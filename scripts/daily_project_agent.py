@@ -76,6 +76,129 @@ REQUIRED_README_SECTIONS = [
     "## Learning Outcomes",
 ]
 
+OFFLINE_IDEA_BANK = [
+    {
+        "title": "Local API Contract Drift Monitor",
+        "storage_type": "general",
+        "category_or_domain": "developer-tools",
+        "difficulty": "Intermediate",
+        "summary": "A CLI tool that compares saved OpenAPI snapshots against current local services and reports breaking API changes before they reach production.",
+        "problem": "Small teams often change backend routes, request bodies, or response schemas without realizing that frontend apps, SDKs, or partner integrations depend on the old contract. Online API platforms can help, but developers also need a local-first workflow that works during offline development, hackathons, or restricted network environments.",
+        "solution": "Build a local CLI that stores OpenAPI or JSON Schema snapshots in the repository, probes a running local API, compares the live schema against the baseline, and produces a human-readable drift report with severity levels. The tool can also generate Markdown changelogs for pull requests.",
+        "users": "Backend developers, full-stack teams, API maintainers, QA engineers, and students learning API design.",
+        "features": [
+            "Snapshot and compare OpenAPI specifications",
+            "Detect removed routes, changed status codes, renamed fields, and type changes",
+            "Generate Markdown drift reports for commits or pull requests",
+            "Support local mock servers and exported schema files",
+            "Provide configurable rules for breaking versus non-breaking changes",
+        ],
+        "advanced": [
+            "SDK compatibility scoring for TypeScript and Python clients",
+            "Git hook integration before commit or push",
+            "Offline HTML report with route-level diff visualization",
+            "Schema history timeline for long-running projects",
+        ],
+        "tech_stack": "Python, Typer, Rich, jsonschema, pydantic, SQLite, pytest",
+    },
+    {
+        "title": "Offline Study Path Generator",
+        "storage_type": "general",
+        "category_or_domain": "programming-education",
+        "difficulty": "Beginner",
+        "summary": "A local study planner that turns a programming topic into a structured roadmap using bundled curriculum templates instead of internet access.",
+        "problem": "Students do not always have reliable internet, and many online learning paths are too broad or distracting. A focused offline planner can help learners choose what to study next, track progress, and practice consistently.",
+        "solution": "Build a desktop or CLI app with local curriculum templates for topics like Python, data structures, web development, and databases. The app generates weekly plans, practice tasks, checkpoint quizzes, and project suggestions from local JSON files.",
+        "users": "CS students, bootcamp learners, teachers, self-taught developers, and coding club mentors.",
+        "features": [
+            "Generate weekly study plans from local templates",
+            "Track completed lessons, quizzes, and mini-projects",
+            "Export progress reports as Markdown",
+            "Support beginner, intermediate, and advanced tracks",
+            "Store all data locally without login",
+        ],
+        "advanced": [
+            "Spaced repetition review calendar",
+            "Offline code challenge packs",
+            "Teacher mode for assigning roadmaps to a class",
+            "Import/export curriculum packs as JSON",
+        ],
+        "tech_stack": "Python, Textual or Tkinter, SQLite, Markdown, pytest",
+    },
+    {
+        "title": "Personal Data Pipeline Sandbox",
+        "storage_type": "general",
+        "category_or_domain": "data-science",
+        "difficulty": "Intermediate",
+        "summary": "A local data engineering playground for building, testing, and documenting CSV-to-dashboard pipelines without cloud services.",
+        "problem": "New data engineers often struggle to practice realistic pipelines because tutorials depend on cloud accounts, paid warehouses, or large datasets. A local sandbox can teach ingestion, validation, transformation, and visualization with reproducible examples.",
+        "solution": "Create a project that ingests local CSV/JSON files, validates them, transforms them into analytical tables, and generates static charts plus a pipeline report. Everything runs from the command line and stores outputs in a local workspace.",
+        "users": "Data science students, junior data engineers, analysts, and educators building classroom labs.",
+        "features": [
+            "Local dataset ingestion from CSV, JSON, and SQLite",
+            "Validation rules for missing values, ranges, and schema mismatches",
+            "Reusable transformation steps with dependency ordering",
+            "Static chart generation and Markdown reporting",
+            "Pipeline run history stored locally",
+        ],
+        "advanced": [
+            "Data lineage graph",
+            "Great Expectations-style quality checks",
+            "Local scheduling with cron or Task Scheduler",
+            "Plugin system for custom transformations",
+        ],
+        "tech_stack": "Python, pandas, DuckDB, SQLite, matplotlib, pytest",
+    },
+    {
+        "title": "Container Readiness Checklist CLI",
+        "storage_type": "general",
+        "category_or_domain": "cloud-devops",
+        "difficulty": "Intermediate",
+        "summary": "A command-line checklist that audits Docker projects for common production-readiness issues before deployment.",
+        "problem": "Many projects ship containers that work locally but fail in production because of missing health checks, large images, root users, hardcoded secrets, or weak build caching. Developers need a simple offline audit before pushing to CI.",
+        "solution": "Build a CLI that scans Dockerfiles, compose files, and project metadata to produce a readiness score with practical fixes. The tool should work without contacting registries or cloud APIs.",
+        "users": "Backend developers, DevOps learners, platform teams, and open-source maintainers.",
+        "features": [
+            "Dockerfile linting for security and image size issues",
+            "Compose file checks for ports, volumes, and health checks",
+            "Secret-pattern detection in local configuration files",
+            "Readiness score with prioritized remediation steps",
+            "Markdown report export",
+        ],
+        "advanced": [
+            "Policy packs for different deployment targets",
+            "GitHub Actions annotation output",
+            "SBOM file detection and validation",
+            "Before/after score comparison across commits",
+        ],
+        "tech_stack": "Python, PyYAML, Rich, pathlib, pytest",
+    },
+    {
+        "title": "Clinic Queue Insight Simulator",
+        "storage_type": "ai-builders-congress",
+        "category_or_domain": "healthsphere-ai",
+        "difficulty": "Intermediate",
+        "summary": "An offline simulator that helps small clinics model patient queues, waiting times, and staffing changes before changing operations.",
+        "problem": "Clinics often face long waiting times but lack enough historical data or software budget to test operational changes. A local simulator can help staff understand bottlenecks and experiment safely.",
+        "solution": "Build a simulation tool where users define doctors, service counters, appointment slots, and walk-in rates. The system generates synthetic patient flows, predicts waiting time distributions, and recommends staffing adjustments.",
+        "users": "Clinic administrators, public health students, hospital operations teams, and healthcare hackathon builders.",
+        "features": [
+            "Synthetic patient arrival and service-time generation",
+            "Queue simulation for multiple counters or doctors",
+            "Waiting time and utilization dashboards",
+            "Scenario comparison for staffing and appointment rules",
+            "Offline PDF or Markdown report generation",
+        ],
+        "advanced": [
+            "ML-based wait time prediction from imported historical CSV data",
+            "Triage-priority simulation",
+            "What-if optimizer for staffing plans",
+            "Privacy-first local data storage",
+        ],
+        "tech_stack": "Python, SimPy, pandas, scikit-learn, Streamlit, SQLite",
+    },
+]
+
 
 class AgentError(RuntimeError):
     """Raised when the agent cannot safely complete its run."""
@@ -171,6 +294,13 @@ def require_env(name: str) -> str:
     if not value:
         raise AgentError(f"Missing required environment variable: {name}")
     return value
+
+
+def env_flag(name: str, default: bool = False) -> bool:
+    value = os.getenv(name)
+    if value is None:
+        return default
+    return value.strip().lower() in {"1", "true", "yes", "on"}
 
 
 def clean_json_content(content: str) -> str:
@@ -379,6 +509,158 @@ def call_ai_api(api_url: str, api_key: str, model: str, existing: list[ExistingI
         raise AgentError(f"AI_API response did not contain valid JSON project data: {exc}") from exc
 
 
+def offline_readme(seed: dict[str, Any], title: str) -> str:
+    today = date.today().isoformat()
+    features = "\n".join(f"- {item}" for item in seed["features"])
+    advanced = "\n".join(f"- {item}" for item in seed["advanced"])
+    category = seed["category_or_domain"]
+    return f"""# {title}
+
+## Category / Domain
+
+{category}
+
+## Date
+
+{today}
+
+## Short Description
+
+{seed["summary"]}
+
+## Problem Statement
+
+{seed["problem"]}
+
+## Proposed Solution
+
+{seed["solution"]}
+
+## Target Users
+
+{seed["users"]}
+
+## Core Features
+
+{features}
+
+## Advanced Features
+
+{advanced}
+
+## AI/ML Integration
+
+- Use lightweight anomaly detection or scoring models where useful, but keep the first version fully functional with deterministic local logic.
+- Add optional local ML experiments later using imported CSV data and transparent evaluation metrics.
+- Keep all user data local by default so the project remains usable without cloud services.
+
+## Suggested Tech Stack
+
+{seed["tech_stack"]}
+
+## Database Design
+
+| Table | Purpose |
+|---|---|
+| `projects` | Stores workspace-level project metadata and configuration. |
+| `runs` | Tracks each execution, simulation, scan, or generation event. |
+| `items` | Stores domain-specific records such as checks, lessons, routes, patients, or datasets. |
+| `findings` | Captures generated recommendations, warnings, scores, and report entries. |
+| `settings` | Stores local preferences and reusable presets. |
+
+## API Route Ideas
+
+| Method | Route | Description |
+|---|---|---|
+| `GET` | `/api/health` | Check whether the local service is running. |
+| `GET` | `/api/projects` | List local workspaces or project profiles. |
+| `POST` | `/api/runs` | Start a new analysis, generation, scan, or simulation. |
+| `GET` | `/api/runs/:id` | Read the result of one run. |
+| `GET` | `/api/reports/:id` | Export a Markdown or JSON report. |
+
+## UI Pages
+
+1. **Dashboard** - Shows recent runs, key metrics, and next recommended actions.
+2. **Workspace Setup** - Lets users configure local files, presets, and project settings.
+3. **Run Detail** - Displays findings, warnings, scores, and generated outputs.
+4. **History** - Helps users compare previous runs and track improvement over time.
+5. **Settings** - Manages local preferences, export paths, and privacy controls.
+
+## MVP Plan
+
+| Phase | Duration | Deliverables |
+|---|---|---|
+| Phase 1 | Week 1 | CLI workflow, local configuration, and sample data. |
+| Phase 2 | Week 2 | Core analysis engine and Markdown report output. |
+| Phase 3 | Week 3 | SQLite persistence and history tracking. |
+| Phase 4 | Week 4 | Simple UI, tests, documentation, and demo dataset. |
+
+## Future Scope
+
+- Add plugin support for custom rules and domain packs.
+- Add richer visual reports for sharing with teams or teachers.
+- Add optional cloud sync while keeping offline mode as the default.
+- Add import/export bundles so users can move workspaces between machines.
+
+## Difficulty Level
+
+{seed["difficulty"]}
+
+## Portfolio Value
+
+This project demonstrates practical product thinking, local-first architecture, file handling, data modeling, testing, and user-focused reporting. It is strong portfolio material because it solves a real workflow problem without depending on paid services.
+
+## Possible Monetization
+
+- Offer paid domain-specific template packs.
+- Provide a hosted collaboration version for teams.
+- Sell support, customization, or classroom deployment services.
+- Package advanced reporting as a professional edition.
+
+## Learning Outcomes
+
+- Practice building local-first software with clear boundaries.
+- Learn how to design useful reports and actionable recommendations.
+- Improve skills with Python packaging, testing, and structured data.
+- Understand how to turn a narrow technical pain point into a complete product.
+"""
+
+
+def build_offline_raw_idea(existing: list[ExistingIdea]) -> dict[str, Any]:
+    existing_slugs = {item.slug.lower() for item in existing}
+    existing_titles = {item.title.strip().lower() for item in existing if item.title}
+    today = date.today().isoformat()
+
+    for offset in range(len(OFFLINE_IDEA_BANK) * 20):
+        seed = OFFLINE_IDEA_BANK[(date.today().toordinal() + len(existing) + offset) % len(OFFLINE_IDEA_BANK)]
+        title = seed["title"]
+        slug = slugify(title)
+        if slug in existing_slugs or title.lower() in existing_titles:
+            title = f"{seed['title']} {today}"
+            slug = slugify(title)
+        if slug in existing_slugs or title.lower() in existing_titles:
+            title = f"{seed['title']} Local Build {offset + 1}"
+            slug = slugify(title)
+        if slug in existing_slugs or title.lower() in existing_titles:
+            continue
+
+        base = target_base_for(seed["storage_type"])
+        file_path = f"{base}/{seed['category_or_domain']}/{slug}/README.md"
+        return {
+            "title": title,
+            "storage_type": seed["storage_type"],
+            "category_or_domain": seed["category_or_domain"],
+            "target_folder": f"{base}/{seed['category_or_domain']}/{slug}",
+            "slug": slug,
+            "file_path": file_path,
+            "difficulty": seed["difficulty"],
+            "commit_message": f"Add {seed['category_or_domain']} project idea: {title}",
+            "readme": offline_readme(seed, title),
+        }
+
+    raise AgentError("Offline idea bank could not produce a unique project idea")
+
+
 def validate_not_duplicate(idea: ProjectIdea, existing: list[ExistingIdea]) -> None:
     existing_slugs = {item.slug.lower() for item in existing}
     existing_titles = {item.title.strip().lower() for item in existing if item.title}
@@ -391,6 +673,13 @@ def validate_not_duplicate(idea: ProjectIdea, existing: list[ExistingIdea]) -> N
 
 
 def generate_project_idea(root: Path, existing: list[ExistingIdea]) -> ProjectIdea:
+    if env_flag("OFFLINE_MODE"):
+        log("OFFLINE_MODE is enabled; generating project idea without AI_API")
+        raw_idea = build_offline_raw_idea(existing)
+        idea = normalize_idea(raw_idea, root)
+        validate_not_duplicate(idea, existing)
+        return idea
+
     api_key = require_env("AI_API_KEY")
     api_url = require_env("AI_API_URL")
     model = require_env("AI_MODEL")
@@ -442,6 +731,11 @@ def commit_and_push(root: Path, idea: ProjectIdea) -> None:
     configure_git(root)
     run_command(["git", "add", "--", relative_path], cwd=root)
     run_command(["git", "commit", "-m", idea.commit_message], cwd=root)
+    if env_flag("OFFLINE_MODE") or env_flag("SKIP_GIT_PUSH"):
+        log("Skipping git push because OFFLINE_MODE or SKIP_GIT_PUSH is enabled")
+        log(f"Success: created {relative_path}")
+        log(f"Commit message: {idea.commit_message}")
+        return
     run_command(["git", "push", "origin", f"HEAD:{branch}"], cwd=root)
     log(f"Success: created {relative_path}")
     log(f"Commit message: {idea.commit_message}")

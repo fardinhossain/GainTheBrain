@@ -41,9 +41,11 @@ cp .env.example .env
 AI_API_KEY=your_api_key
 AI_API_URL=https://your-openai-compatible-endpoint/v1/chat/completions
 AI_MODEL=your_model_name
-GIT_COMMIT_NAME=GainTheBrain Bot
-GIT_COMMIT_EMAIL=bot@example.com
+GIT_COMMIT_NAME=Fardin Hossain
+GIT_COMMIT_EMAIL=your-github-verified-email@example.com
 GITHUB_BRANCH=main
+OFFLINE_MODE=false
+SKIP_GIT_PUSH=false
 ```
 
 3. Install dependencies and run:
@@ -52,6 +54,29 @@ GITHUB_BRANCH=main
 pip install -r requirements.txt
 python scripts/daily_project_agent.py
 ```
+
+### Fully Offline Mode
+
+Set these values in `.env` when you want the agent to run without internet:
+
+```env
+OFFLINE_MODE=true
+SKIP_GIT_PUSH=true
+```
+
+Then run:
+
+```bash
+python scripts/daily_project_agent.py
+```
+
+Offline mode does not call `AI_API_URL` and does not push to GitHub. It generates one project idea from a built-in local idea bank, writes the new `README.md`, and creates a local commit only. Push later when you are back online:
+
+```bash
+git push origin main
+```
+
+GitHub contribution credit appears only after the commit is pushed to GitHub, and only if `GIT_COMMIT_EMAIL` is verified on your GitHub account.
 
 ### GitHub Actions Setup
 
