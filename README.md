@@ -4,8 +4,8 @@
 
 ### *Your daily dose of developer inspiration — project ideas, tech news, and AI innovation*
 
-[![Stars](https://img.shields.io/github/stars/AhmadHassan71/GainTheBrain?style=for-the-badge&logo=github&color=f5c542)](https://github.com/AhmadHassan71/GainTheBrain/stargazers)
-[![Forks](https://img.shields.io/github/forks/AhmadHassan71/GainTheBrain?style=for-the-badge&logo=github&color=4287f5)](https://github.com/AhmadHassan71/GainTheBrain/network/members)
+[![Stars](https://img.shields.io/github/stars/fardinhossain/GainTheBrain?style=for-the-badge&logo=github&color=f5c542)](https://github.com/fardinhossain/GainTheBrain/stargazers)
+[![Forks](https://img.shields.io/github/forks/fardinhossain/GainTheBrain?style=for-the-badge&logo=github&color=4287f5)](https://github.com/fardinhossain/GainTheBrain/network/members)
 [![License: MIT](https://img.shields.io/badge/License-MIT-brightgreen?style=for-the-badge)](LICENSE)
 [![Updated Daily](https://img.shields.io/badge/Updated-Daily-blueviolet?style=for-the-badge&logo=clockify&logoColor=white)](#-fresh-content-daily)
 
@@ -193,7 +193,7 @@ ai-builders-congress/
 
 ```bash
 # Clone the repository
-git clone https://github.com/AhmadHassan71/GainTheBrain.git
+git clone https://github.com/fardinhossain/GainTheBrain.git
 
 # Open it up and start exploring
 cd GainTheBrain
@@ -256,7 +256,7 @@ You are free to use, modify, and distribute the content in this repository, with
 
 **If this repo helps you learn, build, or stay informed — give it a ⭐**
 
-Made with 🧠 by [Ahmad Hassan](https://github.com/AhmadHassan71) and contributors
+Made with 🧠 by [Fardin Hossain](https://github.com/fardinhossain) and contributors
 
 <br/>
 
