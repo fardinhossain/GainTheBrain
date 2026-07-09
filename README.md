@@ -21,6 +21,52 @@
 
 </div>
 
+---
+
+## Daily Project Idea Agent Setup
+
+This repository includes a Python-based daily agent that generates exactly one new project idea, saves it under the right `project-ideas/` or `ai-builders-congress/` folder, and commits only when a new README.md file is created.
+
+### Local Setup
+
+1. Create a local environment file:
+
+```bash
+cp .env.example .env
+```
+
+2. Fill in `.env`:
+
+```env
+AI_API_KEY=your_api_key
+AI_API_URL=https://your-openai-compatible-endpoint/v1/chat/completions
+AI_MODEL=your_model_name
+GIT_COMMIT_NAME=GainTheBrain Bot
+GIT_COMMIT_EMAIL=bot@example.com
+GITHUB_BRANCH=main
+```
+
+3. Install dependencies and run:
+
+```bash
+pip install -r requirements.txt
+python scripts/daily_project_agent.py
+```
+
+### GitHub Actions Setup
+
+Add these repository secrets in GitHub under **Settings -> Secrets and variables -> Actions**:
+
+- `AI_API_KEY`
+- `AI_API_URL`
+- `AI_MODEL`
+- `GIT_COMMIT_NAME`
+- `GIT_COMMIT_EMAIL`
+
+Set `GIT_COMMIT_NAME` and `GIT_COMMIT_EMAIL` to your GitHub profile name and a GitHub-verified email address. Commits only appear in your GitHub contribution graph when the commit author email is verified on that GitHub account.
+
+The workflow at `.github/workflows/daily-project-agent.yml` runs every day at `03:17 UTC` and can also be started manually from the GitHub Actions tab.
+
 <br/>
 
 ## 📖 What Is GainTheBrain?
