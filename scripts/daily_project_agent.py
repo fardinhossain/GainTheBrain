@@ -1,9 +1,5 @@
 #!/usr/bin/env python3
-"""Daily project idea generator for GainTheBrain.
-
-The agent creates exactly one original project idea, stores it in the correct
-repository folder, and commits/pushes only when a new README.md was written.
-"""
+"""Generate, store, commit, and push exactly one unique project idea."""
 
 from __future__ import annotations
 
@@ -16,6 +12,7 @@ from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlparse
 
 import requests
 from dotenv import load_dotenv
@@ -54,7 +51,7 @@ AI_BUILDERS_DOMAINS = {
 
 VALID_STORAGE_TYPES = {"general", "ai-builders-congress"}
 VALID_DIFFICULTIES = {"Beginner", "Intermediate", "Advanced"}
-REQUIRED_README_SECTIONS = [
+REQUIRED_README_SECTIONS = (
     "## Category / Domain",
     "## Date",
     "## Short Description",
@@ -74,134 +71,22 @@ REQUIRED_README_SECTIONS = [
     "## Portfolio Value",
     "## Possible Monetization",
     "## Learning Outcomes",
-]
-
-OFFLINE_IDEA_BANK = [
-    {
-        "title": "Local API Contract Drift Monitor",
-        "storage_type": "general",
-        "category_or_domain": "developer-tools",
-        "difficulty": "Intermediate",
-        "summary": "A CLI tool that compares saved OpenAPI snapshots against current local services and reports breaking API changes before they reach production.",
-        "problem": "Small teams often change backend routes, request bodies, or response schemas without realizing that frontend apps, SDKs, or partner integrations depend on the old contract. Online API platforms can help, but developers also need a local-first workflow that works during offline development, hackathons, or restricted network environments.",
-        "solution": "Build a local CLI that stores OpenAPI or JSON Schema snapshots in the repository, probes a running local API, compares the live schema against the baseline, and produces a human-readable drift report with severity levels. The tool can also generate Markdown changelogs for pull requests.",
-        "users": "Backend developers, full-stack teams, API maintainers, QA engineers, and students learning API design.",
-        "features": [
-            "Snapshot and compare OpenAPI specifications",
-            "Detect removed routes, changed status codes, renamed fields, and type changes",
-            "Generate Markdown drift reports for commits or pull requests",
-            "Support local mock servers and exported schema files",
-            "Provide configurable rules for breaking versus non-breaking changes",
-        ],
-        "advanced": [
-            "SDK compatibility scoring for TypeScript and Python clients",
-            "Git hook integration before commit or push",
-            "Offline HTML report with route-level diff visualization",
-            "Schema history timeline for long-running projects",
-        ],
-        "tech_stack": "Python, Typer, Rich, jsonschema, pydantic, SQLite, pytest",
-    },
-    {
-        "title": "Offline Study Path Generator",
-        "storage_type": "general",
-        "category_or_domain": "programming-education",
-        "difficulty": "Beginner",
-        "summary": "A local study planner that turns a programming topic into a structured roadmap using bundled curriculum templates instead of internet access.",
-        "problem": "Students do not always have reliable internet, and many online learning paths are too broad or distracting. A focused offline planner can help learners choose what to study next, track progress, and practice consistently.",
-        "solution": "Build a desktop or CLI app with local curriculum templates for topics like Python, data structures, web development, and databases. The app generates weekly plans, practice tasks, checkpoint quizzes, and project suggestions from local JSON files.",
-        "users": "CS students, bootcamp learners, teachers, self-taught developers, and coding club mentors.",
-        "features": [
-            "Generate weekly study plans from local templates",
-            "Track completed lessons, quizzes, and mini-projects",
-            "Export progress reports as Markdown",
-            "Support beginner, intermediate, and advanced tracks",
-            "Store all data locally without login",
-        ],
-        "advanced": [
-            "Spaced repetition review calendar",
-            "Offline code challenge packs",
-            "Teacher mode for assigning roadmaps to a class",
-            "Import/export curriculum packs as JSON",
-        ],
-        "tech_stack": "Python, Textual or Tkinter, SQLite, Markdown, pytest",
-    },
-    {
-        "title": "Personal Data Pipeline Sandbox",
-        "storage_type": "general",
-        "category_or_domain": "data-science",
-        "difficulty": "Intermediate",
-        "summary": "A local data engineering playground for building, testing, and documenting CSV-to-dashboard pipelines without cloud services.",
-        "problem": "New data engineers often struggle to practice realistic pipelines because tutorials depend on cloud accounts, paid warehouses, or large datasets. A local sandbox can teach ingestion, validation, transformation, and visualization with reproducible examples.",
-        "solution": "Create a project that ingests local CSV/JSON files, validates them, transforms them into analytical tables, and generates static charts plus a pipeline report. Everything runs from the command line and stores outputs in a local workspace.",
-        "users": "Data science students, junior data engineers, analysts, and educators building classroom labs.",
-        "features": [
-            "Local dataset ingestion from CSV, JSON, and SQLite",
-            "Validation rules for missing values, ranges, and schema mismatches",
-            "Reusable transformation steps with dependency ordering",
-            "Static chart generation and Markdown reporting",
-            "Pipeline run history stored locally",
-        ],
-        "advanced": [
-            "Data lineage graph",
-            "Great Expectations-style quality checks",
-            "Local scheduling with cron or Task Scheduler",
-            "Plugin system for custom transformations",
-        ],
-        "tech_stack": "Python, pandas, DuckDB, SQLite, matplotlib, pytest",
-    },
-    {
-        "title": "Container Readiness Checklist CLI",
-        "storage_type": "general",
-        "category_or_domain": "cloud-devops",
-        "difficulty": "Intermediate",
-        "summary": "A command-line checklist that audits Docker projects for common production-readiness issues before deployment.",
-        "problem": "Many projects ship containers that work locally but fail in production because of missing health checks, large images, root users, hardcoded secrets, or weak build caching. Developers need a simple offline audit before pushing to CI.",
-        "solution": "Build a CLI that scans Dockerfiles, compose files, and project metadata to produce a readiness score with practical fixes. The tool should work without contacting registries or cloud APIs.",
-        "users": "Backend developers, DevOps learners, platform teams, and open-source maintainers.",
-        "features": [
-            "Dockerfile linting for security and image size issues",
-            "Compose file checks for ports, volumes, and health checks",
-            "Secret-pattern detection in local configuration files",
-            "Readiness score with prioritized remediation steps",
-            "Markdown report export",
-        ],
-        "advanced": [
-            "Policy packs for different deployment targets",
-            "GitHub Actions annotation output",
-            "SBOM file detection and validation",
-            "Before/after score comparison across commits",
-        ],
-        "tech_stack": "Python, PyYAML, Rich, pathlib, pytest",
-    },
-    {
-        "title": "Clinic Queue Insight Simulator",
-        "storage_type": "ai-builders-congress",
-        "category_or_domain": "healthsphere-ai",
-        "difficulty": "Intermediate",
-        "summary": "An offline simulator that helps small clinics model patient queues, waiting times, and staffing changes before changing operations.",
-        "problem": "Clinics often face long waiting times but lack enough historical data or software budget to test operational changes. A local simulator can help staff understand bottlenecks and experiment safely.",
-        "solution": "Build a simulation tool where users define doctors, service counters, appointment slots, and walk-in rates. The system generates synthetic patient flows, predicts waiting time distributions, and recommends staffing adjustments.",
-        "users": "Clinic administrators, public health students, hospital operations teams, and healthcare hackathon builders.",
-        "features": [
-            "Synthetic patient arrival and service-time generation",
-            "Queue simulation for multiple counters or doctors",
-            "Waiting time and utilization dashboards",
-            "Scenario comparison for staffing and appointment rules",
-            "Offline PDF or Markdown report generation",
-        ],
-        "advanced": [
-            "ML-based wait time prediction from imported historical CSV data",
-            "Triage-priority simulation",
-            "What-if optimizer for staffing plans",
-            "Privacy-first local data storage",
-        ],
-        "tech_stack": "Python, SimPy, pandas, scikit-learn, Streamlit, SQLite",
-    },
-]
+)
 
 
 class AgentError(RuntimeError):
-    """Raised when the agent cannot safely complete its run."""
+    """A safe, user-facing agent failure."""
+
+
+@dataclass(frozen=True)
+class Settings:
+    api_key: str
+    api_url: str
+    model: str
+    git_name: str
+    git_email: str
+    branch: str
+    skip_push: bool
 
 
 @dataclass(frozen=True)
@@ -227,17 +112,61 @@ def log(message: str) -> None:
     print(f"[daily-project-agent] {message}", flush=True)
 
 
-def run_command(args: list[str], cwd: Path, check: bool = True) -> subprocess.CompletedProcess[str]:
-    """Run a command with clear logging while keeping secrets out of output."""
-    log(f"Running: {' '.join(args)}")
-    result = subprocess.run(
-        args,
-        cwd=cwd,
-        check=False,
-        text=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+def env_flag(name: str, default: bool = False) -> bool:
+    value = os.getenv(name)
+    return default if value is None else value.strip().lower() in {"1", "true", "yes", "on"}
+
+
+def load_settings() -> Settings:
+    required_names = (
+        "AI_API_KEY",
+        "AI_API_URL",
+        "AI_MODEL",
+        "GIT_COMMIT_NAME",
+        "GIT_COMMIT_EMAIL",
     )
+    values = {name: os.getenv(name, "").strip() for name in required_names}
+    missing = [name for name, value in values.items() if not value]
+    if missing:
+        raise AgentError(
+            "Missing required environment variables: "
+            + ", ".join(missing)
+            + ". Add them to .env locally or GitHub Actions repository secrets."
+        )
+
+    parsed_url = urlparse(values["AI_API_URL"])
+    if parsed_url.scheme not in {"http", "https"} or not parsed_url.netloc:
+        raise AgentError("AI_API_URL must be a complete http:// or https:// chat-completions URL")
+
+    branch = os.getenv("GITHUB_BRANCH", "main").strip() or "main"
+    if not re.fullmatch(r"[A-Za-z0-9._/-]+", branch) or ".." in branch or branch.startswith("-"):
+        raise AgentError(f"Unsafe GITHUB_BRANCH value: {branch}")
+
+    return Settings(
+        api_key=values["AI_API_KEY"],
+        api_url=values["AI_API_URL"],
+        model=values["AI_MODEL"],
+        git_name=values["GIT_COMMIT_NAME"],
+        git_email=values["GIT_COMMIT_EMAIL"],
+        branch=branch,
+        skip_push=env_flag("SKIP_GIT_PUSH"),
+    )
+
+
+def run_command(args: list[str], cwd: Path, check: bool = True) -> subprocess.CompletedProcess[str]:
+    log(f"Running: {' '.join(args)}")
+    try:
+        result = subprocess.run(
+            args,
+            cwd=cwd,
+            check=False,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+    except OSError as exc:
+        raise AgentError(f"Could not run {args[0]}: {exc}") from exc
+
     if result.stdout.strip():
         print(result.stdout.strip())
     if result.stderr.strip():
@@ -252,7 +181,7 @@ def repo_root() -> Path:
 
 
 def create_base_folders(root: Path) -> None:
-    log("Ensuring base folders exist")
+    log("Ensuring all project category and AI Builders Congress folders exist")
     for category in sorted(PROJECT_CATEGORIES):
         (root / "project-ideas" / category).mkdir(parents=True, exist_ok=True)
     for domain in sorted(AI_BUILDERS_DOMAINS):
@@ -262,481 +191,309 @@ def create_base_folders(root: Path) -> None:
 def read_title(readme_path: Path) -> str:
     try:
         for line in readme_path.read_text(encoding="utf-8", errors="replace").splitlines():
-            stripped = line.strip()
-            if stripped.startswith("# "):
-                return stripped[2:].strip()
+            if line.strip().startswith("# "):
+                return line.strip()[2:].strip()
     except OSError:
-        return ""
+        pass
     return readme_path.parent.name.replace("-", " ").title()
 
 
 def scan_existing_ideas(root: Path) -> list[ExistingIdea]:
-    log("Scanning existing project README.md files")
+    log("Scanning existing titles, slugs, and README.md paths")
     ideas: list[ExistingIdea] = []
     for base_name in ("project-ideas", "ai-builders-congress"):
-        base = root / base_name
-        if not base.exists():
-            continue
-        for readme in sorted(base.glob("*/*/README.md")):
+        for readme in sorted((root / base_name).glob("*/*/README.md")):
             ideas.append(
                 ExistingIdea(
                     title=read_title(readme),
                     slug=readme.parent.name,
-                    path=str(readme.relative_to(root)).replace("\\", "/"),
+                    path=readme.relative_to(root).as_posix(),
                 )
             )
     log(f"Found {len(ideas)} existing project ideas")
     return ideas
 
 
-def require_env(name: str) -> str:
-    value = os.getenv(name, "").strip()
-    if not value:
-        raise AgentError(f"Missing required environment variable: {name}")
-    return value
-
-
-def env_flag(name: str, default: bool = False) -> bool:
-    value = os.getenv(name)
-    if value is None:
-        return default
-    return value.strip().lower() in {"1", "true", "yes", "on"}
-
-
 def clean_json_content(content: str) -> str:
-    cleaned = content.strip()
+    cleaned = content.strip().lstrip("\ufeff")
     if cleaned.startswith("```"):
         cleaned = re.sub(r"^```(?:json)?\s*", "", cleaned, flags=re.IGNORECASE)
-        cleaned = re.sub(r"\s*```$", "", cleaned)
+        cleaned = re.sub(r"\s*```\s*$", "", cleaned)
     return cleaned.strip()
+
+
+def parse_json_object(content: str) -> dict[str, Any]:
+    cleaned = clean_json_content(content)
+    try:
+        parsed = json.loads(cleaned)
+    except json.JSONDecodeError:
+        start = cleaned.find("{")
+        if start < 0:
+            raise AgentError("AI response does not contain a JSON object")
+        try:
+            parsed, _ = json.JSONDecoder().raw_decode(cleaned[start:])
+        except json.JSONDecodeError as exc:
+            raise AgentError(f"AI response contains invalid JSON: {exc.msg}") from exc
+
+    if not isinstance(parsed, dict):
+        raise AgentError("AI response must be exactly one JSON object, not a list or scalar")
+    return parsed
+
+
+def extract_response_content(body: Any) -> str:
+    try:
+        message = body["choices"][0]["message"]
+    except (KeyError, IndexError, TypeError) as exc:
+        raise AgentError("AI_API response is missing choices[0].message") from exc
+
+    parsed = message.get("parsed") if isinstance(message, dict) else None
+    if isinstance(parsed, dict):
+        return json.dumps(parsed)
+
+    content = message.get("content") if isinstance(message, dict) else None
+    if isinstance(content, str) and content.strip():
+        return content
+    if isinstance(content, list):
+        text_parts: list[str] = []
+        for block in content:
+            if isinstance(block, dict) and isinstance(block.get("text"), str):
+                text_parts.append(block["text"])
+        if text_parts:
+            return "\n".join(text_parts)
+    raise AgentError("AI_API response message has no text content")
 
 
 def target_base_for(storage_type: str) -> str:
     return "ai-builders-congress" if storage_type == "ai-builders-congress" else "project-ideas"
 
 
-def is_safe_relative_path(path: Path) -> bool:
-    return not path.is_absolute() and ".." not in path.parts
-
-
 def ensure_inside_allowed_roots(root: Path, target: Path) -> None:
     resolved = target.resolve()
-    allowed_roots = [
-        (root / "project-ideas").resolve(),
-        (root / "ai-builders-congress").resolve(),
-    ]
-    if not any(resolved == allowed or allowed in resolved.parents for allowed in allowed_roots):
-        raise AgentError(f"Refusing to write outside allowed content roots: {target}")
+    allowed = ((root / "project-ideas").resolve(), (root / "ai-builders-congress").resolve())
+    if not any(base in resolved.parents for base in allowed):
+        raise AgentError(f"Refusing to write outside allowed project folders: {target}")
 
 
 def normalize_idea(raw: dict[str, Any], root: Path) -> ProjectIdea:
     title = str(raw.get("title", "")).strip()
-    storage_type = str(raw.get("storage_type", "")).strip()
-    category_or_domain = str(raw.get("category_or_domain", "")).strip()
-    raw_slug = str(raw.get("slug", "")).strip()
-    difficulty = str(raw.get("difficulty", "")).strip()
-    commit_message = str(raw.get("commit_message", "")).strip()
-    readme = str(raw.get("readme", "")).strip()
+    storage_type = str(raw.get("storage_type", "")).strip().lower()
+    category = str(raw.get("category_or_domain", "")).strip().lower()
+    difficulty = str(raw.get("difficulty", "")).strip().title()
+    readme = raw.get("readme", "")
 
-    if not title:
-        raise AgentError("AI response is missing title")
+    if not title or len(title) > 160:
+        raise AgentError("AI response title is missing or longer than 160 characters")
     if storage_type not in VALID_STORAGE_TYPES:
-        raise AgentError(f"Invalid storage_type: {storage_type}")
-
+        raise AgentError(f"Invalid storage_type: {storage_type or '<empty>'}")
     valid_folders = AI_BUILDERS_DOMAINS if storage_type == "ai-builders-congress" else PROJECT_CATEGORIES
-    if category_or_domain not in valid_folders:
-        raise AgentError(f"Invalid category_or_domain for {storage_type}: {category_or_domain}")
-
-    slug = slugify(raw_slug or title)
-    if not slug or not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", slug):
-        raise AgentError(f"Invalid slug after sanitization: {raw_slug}")
-
+    if category not in valid_folders:
+        raise AgentError(f"Invalid category_or_domain for {storage_type}: {category or '<empty>'}")
     if difficulty not in VALID_DIFFICULTIES:
-        raise AgentError(f"Invalid difficulty: {difficulty}")
+        raise AgentError(f"Invalid difficulty: {difficulty or '<empty>'}")
+    if not isinstance(readme, str) or not readme.strip().startswith("# "):
+        raise AgentError("AI response readme must be complete Markdown beginning with '# '")
 
-    if not readme or not readme.startswith("# "):
-        raise AgentError("AI response readme must be full Markdown beginning with '# '")
     missing_sections = [section for section in REQUIRED_README_SECTIONS if section not in readme]
     if missing_sections:
-        raise AgentError(f"README is missing required sections: {', '.join(missing_sections)}")
+        raise AgentError("README is missing sections: " + ", ".join(missing_sections))
 
-    base = target_base_for(storage_type)
-    generated_relative = Path(base) / category_or_domain / slug / "README.md"
-    supplied_file_path = str(raw.get("file_path", "")).strip()
-    if supplied_file_path:
-        supplied = Path(supplied_file_path.replace("\\", "/"))
-        if is_safe_relative_path(supplied) and supplied.as_posix() == generated_relative.as_posix():
-            relative_path = supplied
-        else:
-            log("Ignoring unsafe or mismatched AI-supplied file_path; using generated target path")
-            relative_path = generated_relative
-    else:
-        relative_path = generated_relative
+    slug = slugify(str(raw.get("slug", "")).strip() or title, lowercase=True)
+    if not slug or not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", slug):
+        raise AgentError("AI response could not be converted to a safe lowercase slug")
 
-    target_path = root / relative_path
-    ensure_inside_allowed_roots(root, target_path)
+    relative_path = Path(target_base_for(storage_type)) / category / slug / "README.md"
+    supplied_path = str(raw.get("file_path", "")).strip().replace("\\", "/")
+    if supplied_path and supplied_path != relative_path.as_posix():
+        log("Ignoring mismatched AI-supplied file_path and using the classified path")
 
-    if not commit_message:
-        commit_message = f"Add {category_or_domain} project idea: {title}"
+    supplied_folder = str(raw.get("target_folder", "")).strip().replace("\\", "/").rstrip("/")
+    if supplied_folder and supplied_folder != relative_path.parent.as_posix():
+        log("Ignoring mismatched AI-supplied target_folder and using the classified folder")
 
+    file_path = root / relative_path
+    ensure_inside_allowed_roots(root, file_path)
+    commit_message = f"Add {category} project idea: {title}"
     return ProjectIdea(
         title=title,
         storage_type=storage_type,
-        category_or_domain=category_or_domain,
+        category_or_domain=category,
         slug=slug,
-        file_path=target_path,
+        file_path=file_path,
         difficulty=difficulty,
-        commit_message=commit_message,
-        readme=readme.rstrip() + "\n",
+        commit_message=commit_message[:200],
+        readme=readme.strip() + "\n",
     )
 
 
-def build_system_prompt() -> str:
-    return """You are the GainTheBrain Daily Project Idea Agent.
-Return valid JSON only. Do not wrap the JSON in Markdown.
-Generate exactly one original, useful, portfolio-worthy project idea.
-Follow the requested schema exactly and write a complete README.md.
-Do not duplicate any existing title or slug provided by the user.
-Use the classification rules to select storage_type and category_or_domain.
-The README must be meaningful, specific, and immediately useful to a builder."""
-
-
-def build_user_prompt(existing: list[ExistingIdea]) -> str:
-    existing_payload = [
-        {"title": idea.title, "slug": idea.slug, "path": idea.path}
-        for idea in existing
-    ]
-    return f"""
-Today is {date.today().isoformat()}.
-
-Generate exactly one new project idea for the GainTheBrain open-source archive.
-
-Existing project ideas to avoid:
-{json.dumps(existing_payload, indent=2, ensure_ascii=False)}
-
-Valid project-ideas folders:
-{", ".join(sorted(PROJECT_CATEGORIES))}
-
-Valid AI Builders Congress folders:
-{", ".join(sorted(AI_BUILDERS_DOMAINS))}
-
-AI Builders Congress domain rules:
-- foodsphere-ai: food safety, food waste, nutrition, restaurant, food delivery, smart kitchen, food supply chain.
-- healthsphere-ai: healthcare, symptoms, patient care, medicine, hospital, diagnosis support, health monitoring.
-- finsphere-ai: finance, banking, budgeting, fraud detection, fintech, transaction analysis.
-- learnsphere-ai: education, study assistant, exam preparation, course planning, skill development.
-- climatesphere-ai: climate, disaster warning, environment, pollution, weather, carbon tracking.
-- civicsphere-ai: citizen service, smart city, public complaint, government service, community problem solving.
-- agrisphere-ai: agriculture, crop disease, farmer tools, soil, irrigation, smart farming.
-- industrysphere-ai: factory, manufacturing, machine maintenance, industrial automation, production optimization.
-- commercesphere-ai: e-commerce, retail, product recommendation, customer behavior, seller tools.
-- infrasphere-ai: roads, bridges, buildings, transport infrastructure, urban planning, construction safety.
-
-General project folder rules:
-- ai-ml: AI, ML, LLM, computer vision, NLP, recommendation, prediction, automation.
-- full-stack: SaaS, dashboard, marketplace, management platform, CRUD app, complete frontend + backend app.
-- software-engineering: testing, debugging, CI/CD, code quality, architecture, documentation, engineering workflow.
-- web-development: websites, frontend UI, web APIs, browser tools, web-based tools.
-- mobile-app: Android, iOS, Flutter, React Native, mobile-first apps.
-- cybersecurity: security, privacy, authentication, vulnerability detection, phishing detection, malware detection, secure coding.
-- data-science: analytics, datasets, visualization, dashboards, data pipelines.
-- cloud-devops: deployment, Docker, Kubernetes, serverless, cloud, monitoring, infrastructure, DevOps.
-- iot-embedded: sensors, Arduino, ESP32, robotics, smart devices, hardware.
-- blockchain: blockchain, smart contracts, Web3, dApps, crypto utilities.
-- productivity-tools: routine, notes, tasks, link sharing, time management, workflow.
-- developer-tools: CLI, VS Code extension, API tester, code generator, Git helper, debugging helper.
-- programming-education: teaching programming, learning CS, exam preparation, code practice, student learning.
-- general-cs: use only if nothing else matches.
-
-Return JSON with this exact schema:
-{{
-  "title": "Project title",
-  "storage_type": "general or ai-builders-congress",
-  "category_or_domain": "exact folder name",
-  "target_folder": "folder path where project should be saved",
-  "slug": "lowercase-hyphen-project-slug",
-  "file_path": "full README.md path",
-  "difficulty": "Beginner or Intermediate or Advanced",
-  "commit_message": "Add category/domain project idea: project title",
-  "readme": "Full README.md content in Markdown"
-}}
-
-The README must include these headings:
-# Project Title
-## Category / Domain
-## Date
-## Short Description
-## Problem Statement
-## Proposed Solution
-## Target Users
-## Core Features
-## Advanced Features
-## AI/ML Integration
-## Suggested Tech Stack
-## Database Design
-## API Route Ideas
-## UI Pages
-## MVP Plan
-## Future Scope
-## Difficulty Level
-## Portfolio Value
-## Possible Monetization
-## Learning Outcomes
-""".strip()
-
-
-def call_ai_api(api_url: str, api_key: str, model: str, existing: list[ExistingIdea]) -> dict[str, Any]:
-    payload = {
-        "model": model,
-        "messages": [
-            {"role": "system", "content": build_system_prompt()},
-            {"role": "user", "content": build_user_prompt(existing)},
-        ],
-        "temperature": 0.8,
-    }
-    headers = {
-        "Authorization": f"Bearer {api_key}",
-        "Content-Type": "application/json",
-    }
-    response = requests.post(api_url, headers=headers, json=payload, timeout=90)
-    if response.status_code >= 400:
-        raise AgentError(f"AI_API request failed with HTTP {response.status_code}: {response.text[:500]}")
-    try:
-        body = response.json()
-        content = body["choices"][0]["message"]["content"]
-        return json.loads(clean_json_content(content))
-    except (KeyError, IndexError, TypeError, json.JSONDecodeError) as exc:
-        raise AgentError(f"AI_API response did not contain valid JSON project data: {exc}") from exc
-
-
-def offline_readme(seed: dict[str, Any], title: str) -> str:
-    today = date.today().isoformat()
-    features = "\n".join(f"- {item}" for item in seed["features"])
-    advanced = "\n".join(f"- {item}" for item in seed["advanced"])
-    category = seed["category_or_domain"]
-    return f"""# {title}
-
-## Category / Domain
-
-{category}
-
-## Date
-
-{today}
-
-## Short Description
-
-{seed["summary"]}
-
-## Problem Statement
-
-{seed["problem"]}
-
-## Proposed Solution
-
-{seed["solution"]}
-
-## Target Users
-
-{seed["users"]}
-
-## Core Features
-
-{features}
-
-## Advanced Features
-
-{advanced}
-
-## AI/ML Integration
-
-- Use lightweight anomaly detection or scoring models where useful, but keep the first version fully functional with deterministic local logic.
-- Add optional local ML experiments later using imported CSV data and transparent evaluation metrics.
-- Keep all user data local by default so the project remains usable without cloud services.
-
-## Suggested Tech Stack
-
-{seed["tech_stack"]}
-
-## Database Design
-
-| Table | Purpose |
-|---|---|
-| `projects` | Stores workspace-level project metadata and configuration. |
-| `runs` | Tracks each execution, simulation, scan, or generation event. |
-| `items` | Stores domain-specific records such as checks, lessons, routes, patients, or datasets. |
-| `findings` | Captures generated recommendations, warnings, scores, and report entries. |
-| `settings` | Stores local preferences and reusable presets. |
-
-## API Route Ideas
-
-| Method | Route | Description |
-|---|---|---|
-| `GET` | `/api/health` | Check whether the local service is running. |
-| `GET` | `/api/projects` | List local workspaces or project profiles. |
-| `POST` | `/api/runs` | Start a new analysis, generation, scan, or simulation. |
-| `GET` | `/api/runs/:id` | Read the result of one run. |
-| `GET` | `/api/reports/:id` | Export a Markdown or JSON report. |
-
-## UI Pages
-
-1. **Dashboard** - Shows recent runs, key metrics, and next recommended actions.
-2. **Workspace Setup** - Lets users configure local files, presets, and project settings.
-3. **Run Detail** - Displays findings, warnings, scores, and generated outputs.
-4. **History** - Helps users compare previous runs and track improvement over time.
-5. **Settings** - Manages local preferences, export paths, and privacy controls.
-
-## MVP Plan
-
-| Phase | Duration | Deliverables |
-|---|---|---|
-| Phase 1 | Week 1 | CLI workflow, local configuration, and sample data. |
-| Phase 2 | Week 2 | Core analysis engine and Markdown report output. |
-| Phase 3 | Week 3 | SQLite persistence and history tracking. |
-| Phase 4 | Week 4 | Simple UI, tests, documentation, and demo dataset. |
-
-## Future Scope
-
-- Add plugin support for custom rules and domain packs.
-- Add richer visual reports for sharing with teams or teachers.
-- Add optional cloud sync while keeping offline mode as the default.
-- Add import/export bundles so users can move workspaces between machines.
-
-## Difficulty Level
-
-{seed["difficulty"]}
-
-## Portfolio Value
-
-This project demonstrates practical product thinking, local-first architecture, file handling, data modeling, testing, and user-focused reporting. It is strong portfolio material because it solves a real workflow problem without depending on paid services.
-
-## Possible Monetization
-
-- Offer paid domain-specific template packs.
-- Provide a hosted collaboration version for teams.
-- Sell support, customization, or classroom deployment services.
-- Package advanced reporting as a professional edition.
-
-## Learning Outcomes
-
-- Practice building local-first software with clear boundaries.
-- Learn how to design useful reports and actionable recommendations.
-- Improve skills with Python packaging, testing, and structured data.
-- Understand how to turn a narrow technical pain point into a complete product.
-"""
-
-
-def build_offline_raw_idea(existing: list[ExistingIdea]) -> dict[str, Any]:
-    existing_slugs = {item.slug.lower() for item in existing}
-    existing_titles = {item.title.strip().lower() for item in existing if item.title}
-    today = date.today().isoformat()
-
-    for offset in range(len(OFFLINE_IDEA_BANK) * 20):
-        seed = OFFLINE_IDEA_BANK[(date.today().toordinal() + len(existing) + offset) % len(OFFLINE_IDEA_BANK)]
-        title = seed["title"]
-        slug = slugify(title)
-        if slug in existing_slugs or title.lower() in existing_titles:
-            title = f"{seed['title']} {today}"
-            slug = slugify(title)
-        if slug in existing_slugs or title.lower() in existing_titles:
-            title = f"{seed['title']} Local Build {offset + 1}"
-            slug = slugify(title)
-        if slug in existing_slugs or title.lower() in existing_titles:
-            continue
-
-        base = target_base_for(seed["storage_type"])
-        file_path = f"{base}/{seed['category_or_domain']}/{slug}/README.md"
-        return {
-            "title": title,
-            "storage_type": seed["storage_type"],
-            "category_or_domain": seed["category_or_domain"],
-            "target_folder": f"{base}/{seed['category_or_domain']}/{slug}",
-            "slug": slug,
-            "file_path": file_path,
-            "difficulty": seed["difficulty"],
-            "commit_message": f"Add {seed['category_or_domain']} project idea: {title}",
-            "readme": offline_readme(seed, title),
-        }
-
-    raise AgentError("Offline idea bank could not produce a unique project idea")
+def canonical(value: str) -> str:
+    return re.sub(r"[^a-z0-9]+", "", value.lower())
 
 
 def validate_not_duplicate(idea: ProjectIdea, existing: list[ExistingIdea]) -> None:
     existing_slugs = {item.slug.lower() for item in existing}
-    existing_titles = {item.title.strip().lower() for item in existing if item.title}
+    existing_titles = {canonical(item.title) for item in existing if item.title}
     if idea.slug.lower() in existing_slugs:
         raise AgentError(f"Duplicate slug: {idea.slug}")
-    if idea.title.strip().lower() in existing_titles:
+    if canonical(idea.title) in existing_titles:
         raise AgentError(f"Duplicate title: {idea.title}")
     if idea.file_path.exists():
         raise AgentError(f"Target README.md already exists: {idea.file_path}")
 
 
-def generate_project_idea(root: Path, existing: list[ExistingIdea]) -> ProjectIdea:
-    if env_flag("OFFLINE_MODE"):
-        log("OFFLINE_MODE is enabled; generating project idea without AI_API")
-        raw_idea = build_offline_raw_idea(existing)
-        idea = normalize_idea(raw_idea, root)
-        validate_not_duplicate(idea, existing)
-        return idea
+def build_system_prompt() -> str:
+    return """You are the GainTheBrain Daily Project Idea Agent.
+Return valid JSON only, with exactly one project object and no Markdown fence.
+Generate one original, practical, portfolio-worthy project idea.
+Never reuse an existing title, slug, or substantially identical concept.
+Choose the most accurate allowed folder and produce a detailed, buildable README."""
 
-    api_key = require_env("AI_API_KEY")
-    api_url = require_env("AI_API_URL")
-    model = require_env("AI_MODEL")
 
-    last_error: Exception | None = None
+def build_user_prompt(existing: list[ExistingIdea], previous_error: str = "") -> str:
+    existing_payload = [
+        {"title": idea.title, "slug": idea.slug, "path": idea.path} for idea in existing
+    ]
+    retry_note = f"\nThe previous response was rejected: {previous_error}\nGenerate a different valid idea." if previous_error else ""
+    return f"""Today is {date.today().isoformat()}.
+
+Generate exactly one new project idea for the GainTheBrain archive.{retry_note}
+
+Existing ideas to avoid:
+{json.dumps(existing_payload, ensure_ascii=False)}
+
+For storage_type "general", category_or_domain must be one of:
+{", ".join(sorted(PROJECT_CATEGORIES))}
+
+Use storage_type "ai-builders-congress" when the idea strongly matches one of:
+- foodsphere-ai: food safety, waste, nutrition, restaurants, kitchens, or food supply chains
+- healthsphere-ai: healthcare, patients, medicine, hospitals, diagnosis support, or health monitoring
+- finsphere-ai: banking, budgeting, fraud, fintech, or transaction analysis
+- learnsphere-ai: education, study, exams, courses, or skill development
+- climatesphere-ai: climate, disasters, environment, pollution, weather, or carbon
+- civicsphere-ai: citizen services, smart cities, government, or community problems
+- agrisphere-ai: crops, farmers, soil, irrigation, or smart farming
+- industrysphere-ai: factories, manufacturing, maintenance, automation, or production
+- commercesphere-ai: e-commerce, retail, recommendations, customers, or seller tools
+- infrasphere-ai: roads, bridges, buildings, transport, planning, or construction safety
+
+General classification guidance:
+- ai-ml: ML, LLMs, vision, NLP, recommendation, prediction, or AI automation
+- full-stack: SaaS, dashboards, marketplaces, management platforms, or complete web apps
+- software-engineering: testing, CI/CD, quality, architecture, documentation, or engineering workflows
+- web-development: frontend, browser tools, web APIs, or web-only utilities
+- mobile-app: Android, iOS, Flutter, React Native, or mobile-first apps
+- cybersecurity: security, privacy, authentication, vulnerabilities, phishing, or malware
+- data-science: analytics, datasets, visualization, or data pipelines
+- cloud-devops: deployment, containers, cloud, monitoring, infrastructure, or DevOps
+- iot-embedded: sensors, Arduino, ESP32, robotics, smart devices, or hardware
+- blockchain: smart contracts, Web3, dApps, or crypto utilities
+- productivity-tools: notes, tasks, routines, time management, or personal workflows
+- developer-tools: CLIs, editor extensions, API tools, generators, Git, or debugging tools
+- programming-education: teaching code, CS study, exam preparation, or coding practice
+- general-cs: only when no other category fits
+
+Return this exact JSON shape:
+{{
+  "title": "Project title",
+  "storage_type": "general or ai-builders-congress",
+  "category_or_domain": "exact allowed folder name",
+  "target_folder": "classified parent/project-slug",
+  "slug": "lowercase-hyphen-project-slug",
+  "file_path": "classified parent/project-slug/README.md",
+  "difficulty": "Beginner or Intermediate or Advanced",
+  "commit_message": "Add category/domain project idea: project title",
+  "readme": "Full README.md content in Markdown"
+}}
+
+The readme value must include all headings below and meaningful content under every heading:
+# Project Title
+{chr(10).join(REQUIRED_README_SECTIONS)}
+""".strip()
+
+
+def call_ai_api(settings: Settings, existing: list[ExistingIdea], previous_error: str) -> dict[str, Any]:
+    payload = {
+        "model": settings.model,
+        "messages": [
+            {"role": "system", "content": build_system_prompt()},
+            {"role": "user", "content": build_user_prompt(existing, previous_error)},
+        ],
+        "temperature": 0.8,
+    }
+    headers = {"Authorization": f"Bearer {settings.api_key}", "Content-Type": "application/json"}
+    try:
+        response = requests.post(settings.api_url, headers=headers, json=payload, timeout=(15, 120))
+    except requests.RequestException as exc:
+        raise AgentError(f"AI_API network request failed: {exc}") from exc
+
+    if not response.ok:
+        detail = response.text.strip().replace(settings.api_key, "[REDACTED]")[:500]
+        raise AgentError(f"AI_API returned HTTP {response.status_code}: {detail or 'no error body'}")
+    try:
+        body = response.json()
+    except requests.JSONDecodeError as exc:
+        raise AgentError("AI_API returned a non-JSON HTTP response") from exc
+    return parse_json_object(extract_response_content(body))
+
+
+def generate_project_idea(root: Path, settings: Settings, existing: list[ExistingIdea]) -> ProjectIdea:
+    previous_error = ""
     for attempt in range(1, 4):
-        log(f"Requesting project idea from AI_API, attempt {attempt}/3")
+        log(f"Requesting exactly one project idea from AI_API (attempt {attempt}/3)")
         try:
-            raw_idea = call_ai_api(api_url, api_key, model, existing)
+            raw_idea = call_ai_api(settings, existing, previous_error)
             idea = normalize_idea(raw_idea, root)
             validate_not_duplicate(idea, existing)
             return idea
-        except Exception as exc:  # retries intentionally cover invalid JSON and duplicate ideas
-            last_error = exc
-            log(f"Attempt {attempt} failed: {exc}")
-    raise AgentError(f"Unable to generate a valid unique project idea after 3 attempts: {last_error}")
+        except AgentError as exc:
+            previous_error = str(exc)
+            log(f"Attempt {attempt} rejected: {previous_error}")
+    raise AgentError(f"Could not generate one valid unique idea after 3 attempts: {previous_error}")
+
+
+def verify_git_repository(root: Path) -> None:
+    result = run_command(["git", "rev-parse", "--show-toplevel"], cwd=root)
+    if Path(result.stdout.strip()).resolve() != root.resolve():
+        raise AgentError(f"Script is not running at the expected Git repository root: {root}")
+
+
+def configure_git(root: Path, settings: Settings) -> None:
+    run_command(["git", "config", "user.name", settings.git_name], cwd=root)
+    run_command(["git", "config", "user.email", settings.git_email], cwd=root)
 
 
 def write_project_readme(idea: ProjectIdea) -> None:
-    log(f"Writing new project README: {idea.file_path}")
+    log(f"Creating {idea.file_path}")
     idea.file_path.parent.mkdir(parents=True, exist_ok=True)
-    if idea.file_path.exists():
-        raise AgentError(f"Refusing to overwrite existing file: {idea.file_path}")
-    idea.file_path.write_text(idea.readme, encoding="utf-8")
+    try:
+        with idea.file_path.open("x", encoding="utf-8", newline="\n") as file:
+            file.write(idea.readme)
+    except FileExistsError as exc:
+        raise AgentError(f"Refusing to overwrite existing file: {idea.file_path}") from exc
 
 
-def configure_git(root: Path) -> None:
-    name = require_env("GIT_COMMIT_NAME")
-    email = require_env("GIT_COMMIT_EMAIL")
-    run_command(["git", "config", "user.name", name], cwd=root)
-    run_command(["git", "config", "user.email", email], cwd=root)
-
-
-def git_has_changes(root: Path, path: Path) -> bool:
-    relative_path = str(path.relative_to(root)).replace("\\", "/")
-    result = run_command(["git", "status", "--porcelain", "--", relative_path], cwd=root)
-    return bool(result.stdout.strip())
-
-
-def commit_and_push(root: Path, idea: ProjectIdea) -> None:
-    branch = os.getenv("GITHUB_BRANCH", "main").strip() or "main"
-    relative_path = str(idea.file_path.relative_to(root)).replace("\\", "/")
-
-    run_command(["git", "status", "--short"], cwd=root)
-    if not git_has_changes(root, idea.file_path):
-        log("No new file changes detected; skipping commit and push")
+def commit_and_push(root: Path, settings: Settings, idea: ProjectIdea) -> None:
+    relative_path = idea.file_path.relative_to(root).as_posix()
+    status = run_command(
+        ["git", "status", "--porcelain", "--untracked-files=all", "--", relative_path],
+        cwd=root,
+    )
+    if not status.stdout.strip():
+        log("No new project file was detected; skipping commit and push")
         return
 
-    configure_git(root)
     run_command(["git", "add", "--", relative_path], cwd=root)
-    run_command(["git", "commit", "-m", idea.commit_message], cwd=root)
-    if env_flag("OFFLINE_MODE") or env_flag("SKIP_GIT_PUSH"):
-        log("Skipping git push because OFFLINE_MODE or SKIP_GIT_PUSH is enabled")
-        log(f"Success: created {relative_path}")
-        log(f"Commit message: {idea.commit_message}")
+    staged = run_command(["git", "diff", "--cached", "--quiet", "--", relative_path], cwd=root, check=False)
+    if staged.returncode == 0:
+        log("Nothing was staged; skipping empty commit")
         return
-    run_command(["git", "push", "origin", f"HEAD:{branch}"], cwd=root)
+    if staged.returncode != 1:
+        raise AgentError("Could not inspect staged project file")
+
+    run_command(["git", "commit", "-m", idea.commit_message, "--", relative_path], cwd=root)
+    if settings.skip_push:
+        log("SKIP_GIT_PUSH is enabled; the commit was created locally but not pushed")
+    else:
+        run_command(["git", "push", "origin", f"HEAD:{settings.branch}"], cwd=root)
     log(f"Success: created {relative_path}")
     log(f"Commit message: {idea.commit_message}")
 
@@ -745,16 +502,18 @@ def main() -> int:
     load_dotenv()
     root = repo_root()
     log(f"Repository root: {root}")
-
     try:
+        settings = load_settings()
+        verify_git_repository(root)
+        configure_git(root, settings)
         create_base_folders(root)
         existing = scan_existing_ideas(root)
-        idea = generate_project_idea(root, existing)
+        idea = generate_project_idea(root, settings, existing)
         write_project_readme(idea)
-        commit_and_push(root, idea)
+        commit_and_push(root, settings, idea)
         return 0
     except AgentError as exc:
-        print(f"ERROR: {exc}", file=sys.stderr)
+        print(f"ERROR: {exc}", file=sys.stderr, flush=True)
         return 1
 
 

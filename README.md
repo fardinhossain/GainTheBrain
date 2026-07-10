@@ -25,7 +25,7 @@
 
 ## Daily Project Idea Agent Setup
 
-This repository includes a Python-based daily agent that generates exactly one new project idea, saves it under the right `project-ideas/` or `ai-builders-congress/` folder, and commits only when a new README.md file is created.
+This repository includes a Python agent that calls an OpenAI-compatible chat-completions API, generates exactly one unique project idea, saves it under the correct `project-ideas/` or `ai-builders-congress/` folder, and commits only when one new `README.md` is created.
 
 ### Local Setup
 
@@ -42,10 +42,9 @@ AI_API_KEY=your_api_key
 AI_API_URL=https://your-openai-compatible-endpoint/v1/chat/completions
 AI_MODEL=your_model_name
 GIT_COMMIT_NAME=Fardin Hossain
-GIT_COMMIT_EMAIL=your-github-verified-email@example.com
+GIT_COMMIT_EMAIL=iamfardin.swe@gmail.com
 GITHUB_BRANCH=main
-OFFLINE_MODE=false
-SKIP_GIT_PUSH=false
+SKIP_GIT_PUSH=true
 ```
 
 3. Install dependencies and run:
@@ -55,22 +54,7 @@ pip install -r requirements.txt
 python scripts/daily_project_agent.py
 ```
 
-### Fully Offline Mode
-
-Set these values in `.env` when you want the agent to run without internet:
-
-```env
-OFFLINE_MODE=true
-SKIP_GIT_PUSH=true
-```
-
-Then run:
-
-```bash
-python scripts/daily_project_agent.py
-```
-
-Offline mode does not call `AI_API_URL` and does not push to GitHub. It generates one project idea from a built-in local idea bank, writes the new `README.md`, and creates a local commit only. Push later when you are back online:
+Local testing creates a real commit but does not push while `SKIP_GIT_PUSH=true`. After checking the generated idea, push it with:
 
 ```bash
 git push origin main
@@ -90,7 +74,17 @@ Add these repository secrets in GitHub under **Settings -> Secrets and variables
 
 Set `GIT_COMMIT_NAME` and `GIT_COMMIT_EMAIL` to your GitHub profile name and a GitHub-verified email address. Commits only appear in your GitHub contribution graph when the commit author email is verified on that GitHub account.
 
-The workflow at `.github/workflows/daily-project-agent.yml` runs every day at `03:17 UTC` and can also be started manually from the GitHub Actions tab.
+The workflow at `.github/workflows/daily-project-agent.yml` runs every day at `03:17 UTC` (`09:17` in Bangladesh) and can also be started manually from the GitHub Actions tab. It validates all five secrets before running, so a configuration problem is named clearly in the job log.
+
+### Troubleshooting a Failed Action
+
+Open the failed run and expand **Validate agent secrets** or **Run daily project idea agent**. Common errors are:
+
+- `Missing GitHub Actions secrets`: add every listed secret under **Settings -> Secrets and variables -> Actions**.
+- `HTTP 401` or `HTTP 403`: replace `AI_API_KEY` with a valid key for the configured endpoint.
+- `HTTP 404`: set `AI_API_URL` to the full chat-completions endpoint, usually ending in `/v1/chat/completions`.
+- `HTTP 429`: the API account has reached a rate or credit limit.
+- `Invalid category`, `duplicate`, or `invalid JSON`: the agent retries automatically up to three times.
 
 <br/>
 
