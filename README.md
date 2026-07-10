@@ -41,10 +41,10 @@ cp .env.example .env
 AI_API_KEY=your_api_key
 AI_API_URL=https://your-openai-compatible-endpoint/v1/chat/completions
 AI_MODEL=your_model_name
-# Optional DeepSeek fallback; DEEP_SEEK_API_KEY is also accepted
-DEEPSEEK_API_KEY=your_deepseek_api_key
-DEEPSEEK_API_URL=https://api.deepseek.com/chat/completions
-DEEPSEEK_MODEL=deepseek-v4-flash
+# Optional free DeepSeek fallback through OpenRouter
+OPENROUTER_API_KEY=your_openrouter_api_key
+OPENROUTER_API_URL=https://openrouter.ai/api/v1/chat/completions
+OPENROUTER_MODEL=deepseek/deepseek-chat-v3.1:free
 GIT_COMMIT_NAME=Fardin Hossain
 GIT_COMMIT_EMAIL=iamfardin.swe@gmail.com
 GITHUB_BRANCH=main
@@ -76,13 +76,13 @@ Add these repository secrets in GitHub under **Settings -> Secrets and variables
 - `GIT_COMMIT_NAME`
 - `GIT_COMMIT_EMAIL`
 
-Optional DeepSeek fallback secrets:
+Optional free DeepSeek fallback secrets:
 
-- `DEEPSEEK_API_KEY` or `DEEP_SEEK_API_KEY`
-- `DEEPSEEK_API_URL` (defaults to `https://api.deepseek.com/chat/completions`)
-- `DEEPSEEK_MODEL` (defaults to `deepseek-v4-flash`)
+- `OPENROUTER_API_KEY` or `OPEN_ROUTER_API_KEY`
+- `OPENROUTER_API_URL` (defaults to `https://openrouter.ai/api/v1/chat/completions`)
+- `OPENROUTER_MODEL` (defaults to `deepseek/deepseek-chat-v3.1:free`)
 
-Gemini remains the primary provider. If it cannot produce a valid unique idea after three attempts, the agent automatically tries DeepSeek up to three times. DeepSeek API calls consume your DeepSeek balance or granted credits.
+Gemini remains the primary provider. If it cannot produce a valid unique idea after three attempts, the agent automatically tries the free DeepSeek V3.1 route on OpenRouter up to three times. Free-model capacity and availability are controlled by OpenRouter.
 
 Set `GIT_COMMIT_NAME` and `GIT_COMMIT_EMAIL` to your GitHub profile name and a GitHub-verified email address. Commits only appear in your GitHub contribution graph when the commit author email is verified on that GitHub account.
 

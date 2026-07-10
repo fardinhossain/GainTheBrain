@@ -87,9 +87,9 @@ class Settings:
     git_email: str
     branch: str
     skip_push: bool
-    deepseek_api_key: str = ""
-    deepseek_api_url: str = "https://api.deepseek.com/chat/completions"
-    deepseek_model: str = "deepseek-v4-flash"
+    openrouter_api_key: str = ""
+    openrouter_api_url: str = "https://openrouter.ai/api/v1/chat/completions"
+    openrouter_model: str = "deepseek/deepseek-chat-v3.1:free"
 
 
 @dataclass(frozen=True)
@@ -142,22 +142,25 @@ def load_settings() -> Settings:
     if parsed_url.scheme not in {"http", "https"} or not parsed_url.netloc:
         raise AgentError("AI_API_URL must be a complete http:// or https:// chat-completions URL")
 
-    deepseek_api_key = os.getenv("DEEPSEEK_API_KEY", "").strip() or os.getenv(
-        "DEEP_SEEK_API_KEY", ""
+    openrouter_api_key = os.getenv("OPENROUTER_API_KEY", "").strip() or os.getenv(
+        "OPEN_ROUTER_API_KEY", ""
     ).strip()
-    deepseek_api_url = (
-        os.getenv("DEEPSEEK_API_URL", "").strip()
-        or "https://api.deepseek.com/chat/completions"
+    openrouter_api_url = (
+        os.getenv("OPENROUTER_API_URL", "").strip()
+        or "https://openrouter.ai/api/v1/chat/completions"
     )
-    deepseek_model = os.getenv("DEEPSEEK_MODEL", "").strip() or "deepseek-v4-flash"
-    if deepseek_api_key:
-        parsed_deepseek_url = urlparse(deepseek_api_url)
+    openrouter_model = (
+        os.getenv("OPENROUTER_MODEL", "").strip()
+        or "deepseek/deepseek-chat-v3.1:free"
+    )
+    if openrouter_api_key:
+        parsed_openrouter_url = urlparse(openrouter_api_url)
         if (
-            parsed_deepseek_url.scheme not in {"http", "https"}
-            or not parsed_deepseek_url.netloc
+            parsed_openrouter_url.scheme not in {"http", "https"}
+            or not parsed_openrouter_url.netloc
         ):
             raise AgentError(
-                "DEEPSEEK_API_URL must be a complete http:// or https:// chat-completions URL"
+                "OPENROUTER_API_URL must be a complete http:// or https:// chat-completions URL"
             )
 
     branch = os.getenv("GITHUB_BRANCH", "main").strip() or "main"
@@ -172,9 +175,9 @@ def load_settings() -> Settings:
         git_email=values["GIT_COMMIT_EMAIL"],
         branch=branch,
         skip_push=env_flag("SKIP_GIT_PUSH"),
-        deepseek_api_key=deepseek_api_key,
-        deepseek_api_url=deepseek_api_url,
-        deepseek_model=deepseek_model,
+        openrouter_api_key=openrouter_api_key,
+        openrouter_api_url=openrouter_api_url,
+        openrouter_model=openrouter_model,
     )
 
 
@@ -558,18 +561,18 @@ def generate_project_idea(root: Path, settings: Settings, existing: list[Existin
             model=settings.model,
         )
     except AgentError as primary_error:
-        if not settings.deepseek_api_key:
+        if not settings.openrouter_api_key:
             raise
         log(f"Primary AI API failed: {primary_error}")
-        log("Switching to the configured DeepSeek fallback")
+        log("Switching to the free DeepSeek fallback through OpenRouter")
         return generate_with_provider(
             root,
             settings,
             existing,
-            provider_name="DeepSeek fallback",
-            api_key=settings.deepseek_api_key,
-            api_url=settings.deepseek_api_url,
-            model=settings.deepseek_model,
+            provider_name="OpenRouter DeepSeek fallback",
+            api_key=settings.openrouter_api_key,
+            api_url=settings.openrouter_api_url,
+            model=settings.openrouter_model,
         )
 
 
