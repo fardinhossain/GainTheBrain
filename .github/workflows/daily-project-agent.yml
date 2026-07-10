@@ -20,10 +20,10 @@ jobs:
       AI_API_KEY: ${{ secrets.AI_API_KEY }}
       AI_API_URL: ${{ secrets.AI_API_URL }}
       AI_MODEL: ${{ secrets.AI_MODEL }}
-      XAI_API_KEY: ${{ secrets.XAI_API_KEY }}
-      X_AI_API_KEY: ${{ secrets.X_AI_API_KEY }}
-      XAI_API_URL: ${{ secrets.XAI_API_URL }}
-      XAI_MODEL: ${{ secrets.XAI_MODEL }}
+      DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+      DEEP_SEEK_API_KEY: ${{ secrets.DEEP_SEEK_API_KEY }}
+      DEEPSEEK_API_URL: ${{ secrets.DEEPSEEK_API_URL }}
+      DEEPSEEK_MODEL: ${{ secrets.DEEPSEEK_MODEL }}
       GIT_COMMIT_NAME: ${{ secrets.GIT_COMMIT_NAME }}
       GIT_COMMIT_EMAIL: ${{ secrets.GIT_COMMIT_EMAIL }}
       GITHUB_BRANCH: main

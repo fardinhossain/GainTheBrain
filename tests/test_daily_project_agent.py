@@ -124,7 +124,7 @@ class AgentTests(unittest.TestCase):
                     self.assertTrue(agent.push_with_rebase_retry(root, test_settings(), idea))
         self.assertEqual(run.call_count, 3)
 
-    def test_xai_fallback_runs_after_primary_exhausts_retries(self):
+    def test_deepseek_fallback_runs_after_primary_exhausts_retries(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             settings = agent.Settings(
@@ -135,7 +135,7 @@ class AgentTests(unittest.TestCase):
                 git_email="iamfardin.swe@gmail.com",
                 branch="main",
                 skip_push=True,
-                xai_api_key="xai-key",
+                deepseek_api_key="deepseek-key",
             )
             responses = [
                 agent.AgentError("Gemini unavailable"),
@@ -147,23 +147,25 @@ class AgentTests(unittest.TestCase):
                 idea = agent.generate_project_idea(root, settings, [])
         self.assertEqual(idea.title, "Fresh Idea")
         self.assertEqual(call.call_count, 4)
-        self.assertEqual(call.call_args_list[-1].kwargs["provider_name"], "xAI fallback")
-        self.assertEqual(call.call_args_list[-1].kwargs["model"], "grok-4.3")
+        self.assertEqual(call.call_args_list[-1].kwargs["provider_name"], "DeepSeek fallback")
+        self.assertEqual(call.call_args_list[-1].kwargs["model"], "deepseek-v4-flash")
 
-    def test_load_settings_accepts_x_ai_api_key_alias(self):
+    def test_load_settings_accepts_deep_seek_api_key_alias(self):
         environment = {
             "AI_API_KEY": "gemini-key",
             "AI_API_URL": "https://gemini.example/chat/completions",
             "AI_MODEL": "gemini-model",
             "GIT_COMMIT_NAME": "Fardin Hossain",
             "GIT_COMMIT_EMAIL": "iamfardin.swe@gmail.com",
-            "X_AI_API_KEY": "xai-alias-key",
+            "DEEP_SEEK_API_KEY": "deepseek-alias-key",
         }
         with patch.dict(agent.os.environ, environment, clear=True):
             settings = agent.load_settings()
-        self.assertEqual(settings.xai_api_key, "xai-alias-key")
-        self.assertEqual(settings.xai_api_url, "https://api.x.ai/v1/chat/completions")
-        self.assertEqual(settings.xai_model, "grok-4.3")
+        self.assertEqual(settings.deepseek_api_key, "deepseek-alias-key")
+        self.assertEqual(
+            settings.deepseek_api_url, "https://api.deepseek.com/chat/completions"
+        )
+        self.assertEqual(settings.deepseek_model, "deepseek-v4-flash")
 
     def test_openai_compatible_response_contract(self):
         class Response:

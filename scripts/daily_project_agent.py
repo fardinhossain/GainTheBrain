@@ -87,9 +87,9 @@ class Settings:
     git_email: str
     branch: str
     skip_push: bool
-    xai_api_key: str = ""
-    xai_api_url: str = "https://api.x.ai/v1/chat/completions"
-    xai_model: str = "grok-4.3"
+    deepseek_api_key: str = ""
+    deepseek_api_url: str = "https://api.deepseek.com/chat/completions"
+    deepseek_model: str = "deepseek-v4-flash"
 
 
 @dataclass(frozen=True)
@@ -142,15 +142,23 @@ def load_settings() -> Settings:
     if parsed_url.scheme not in {"http", "https"} or not parsed_url.netloc:
         raise AgentError("AI_API_URL must be a complete http:// or https:// chat-completions URL")
 
-    xai_api_key = os.getenv("XAI_API_KEY", "").strip() or os.getenv("X_AI_API_KEY", "").strip()
-    xai_api_url = (
-        os.getenv("XAI_API_URL", "").strip() or "https://api.x.ai/v1/chat/completions"
+    deepseek_api_key = os.getenv("DEEPSEEK_API_KEY", "").strip() or os.getenv(
+        "DEEP_SEEK_API_KEY", ""
+    ).strip()
+    deepseek_api_url = (
+        os.getenv("DEEPSEEK_API_URL", "").strip()
+        or "https://api.deepseek.com/chat/completions"
     )
-    xai_model = os.getenv("XAI_MODEL", "").strip() or "grok-4.3"
-    if xai_api_key:
-        parsed_xai_url = urlparse(xai_api_url)
-        if parsed_xai_url.scheme not in {"http", "https"} or not parsed_xai_url.netloc:
-            raise AgentError("XAI_API_URL must be a complete http:// or https:// chat-completions URL")
+    deepseek_model = os.getenv("DEEPSEEK_MODEL", "").strip() or "deepseek-v4-flash"
+    if deepseek_api_key:
+        parsed_deepseek_url = urlparse(deepseek_api_url)
+        if (
+            parsed_deepseek_url.scheme not in {"http", "https"}
+            or not parsed_deepseek_url.netloc
+        ):
+            raise AgentError(
+                "DEEPSEEK_API_URL must be a complete http:// or https:// chat-completions URL"
+            )
 
     branch = os.getenv("GITHUB_BRANCH", "main").strip() or "main"
     if not re.fullmatch(r"[A-Za-z0-9._/-]+", branch) or ".." in branch or branch.startswith("-"):
@@ -164,9 +172,9 @@ def load_settings() -> Settings:
         git_email=values["GIT_COMMIT_EMAIL"],
         branch=branch,
         skip_push=env_flag("SKIP_GIT_PUSH"),
-        xai_api_key=xai_api_key,
-        xai_api_url=xai_api_url,
-        xai_model=xai_model,
+        deepseek_api_key=deepseek_api_key,
+        deepseek_api_url=deepseek_api_url,
+        deepseek_model=deepseek_model,
     )
 
 
@@ -550,18 +558,18 @@ def generate_project_idea(root: Path, settings: Settings, existing: list[Existin
             model=settings.model,
         )
     except AgentError as primary_error:
-        if not settings.xai_api_key:
+        if not settings.deepseek_api_key:
             raise
         log(f"Primary AI API failed: {primary_error}")
-        log("Switching to the configured xAI fallback")
+        log("Switching to the configured DeepSeek fallback")
         return generate_with_provider(
             root,
             settings,
             existing,
-            provider_name="xAI fallback",
-            api_key=settings.xai_api_key,
-            api_url=settings.xai_api_url,
-            model=settings.xai_model,
+            provider_name="DeepSeek fallback",
+            api_key=settings.deepseek_api_key,
+            api_url=settings.deepseek_api_url,
+            model=settings.deepseek_model,
         )
 
 
