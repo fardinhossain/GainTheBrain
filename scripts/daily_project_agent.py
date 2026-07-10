@@ -87,6 +87,9 @@ class Settings:
     git_email: str
     branch: str
     skip_push: bool
+    xai_api_key: str = ""
+    xai_api_url: str = "https://api.x.ai/v1/chat/completions"
+    xai_model: str = "grok-4.3"
 
 
 @dataclass(frozen=True)
@@ -139,6 +142,16 @@ def load_settings() -> Settings:
     if parsed_url.scheme not in {"http", "https"} or not parsed_url.netloc:
         raise AgentError("AI_API_URL must be a complete http:// or https:// chat-completions URL")
 
+    xai_api_key = os.getenv("XAI_API_KEY", "").strip() or os.getenv("X_AI_API_KEY", "").strip()
+    xai_api_url = (
+        os.getenv("XAI_API_URL", "").strip() or "https://api.x.ai/v1/chat/completions"
+    )
+    xai_model = os.getenv("XAI_MODEL", "").strip() or "grok-4.3"
+    if xai_api_key:
+        parsed_xai_url = urlparse(xai_api_url)
+        if parsed_xai_url.scheme not in {"http", "https"} or not parsed_xai_url.netloc:
+            raise AgentError("XAI_API_URL must be a complete http:// or https:// chat-completions URL")
+
     branch = os.getenv("GITHUB_BRANCH", "main").strip() or "main"
     if not re.fullmatch(r"[A-Za-z0-9._/-]+", branch) or ".." in branch or branch.startswith("-"):
         raise AgentError(f"Unsafe GITHUB_BRANCH value: {branch}")
@@ -151,6 +164,9 @@ def load_settings() -> Settings:
         git_email=values["GIT_COMMIT_EMAIL"],
         branch=branch,
         skip_push=env_flag("SKIP_GIT_PUSH"),
+        xai_api_key=xai_api_key,
+        xai_api_url=xai_api_url,
+        xai_model=xai_model,
     )
 
 
@@ -446,44 +462,107 @@ The readme value must include all headings below and meaningful content under ev
 """.strip()
 
 
-def call_ai_api(settings: Settings, existing: list[ExistingIdea], previous_error: str) -> dict[str, Any]:
+def call_ai_api(
+    settings: Settings,
+    existing: list[ExistingIdea],
+    previous_error: str,
+    *,
+    provider_name: str = "primary AI",
+    api_key: str = "",
+    api_url: str = "",
+    model: str = "",
+) -> dict[str, Any]:
+    selected_key = api_key or settings.api_key
+    selected_url = api_url or settings.api_url
+    selected_model = model or settings.model
     payload = {
-        "model": settings.model,
+        "model": selected_model,
         "messages": [
             {"role": "system", "content": build_system_prompt()},
             {"role": "user", "content": build_user_prompt(existing, previous_error)},
         ],
         "temperature": 0.8,
     }
-    headers = {"Authorization": f"Bearer {settings.api_key}", "Content-Type": "application/json"}
+    headers = {"Authorization": f"Bearer {selected_key}", "Content-Type": "application/json"}
     try:
-        response = requests.post(settings.api_url, headers=headers, json=payload, timeout=(15, 120))
+        response = requests.post(selected_url, headers=headers, json=payload, timeout=(15, 120))
     except requests.RequestException as exc:
-        raise AgentError(f"AI_API network request failed: {exc}") from exc
+        raise AgentError(f"{provider_name} network request failed: {exc}") from exc
 
     if not response.ok:
-        detail = response.text.strip().replace(settings.api_key, "[REDACTED]")[:500]
-        raise AgentError(f"AI_API returned HTTP {response.status_code}: {detail or 'no error body'}")
+        detail = response.text.strip().replace(selected_key, "[REDACTED]")[:500]
+        raise AgentError(
+            f"{provider_name} returned HTTP {response.status_code}: {detail or 'no error body'}"
+        )
     try:
         body = response.json()
     except requests.JSONDecodeError as exc:
-        raise AgentError("AI_API returned a non-JSON HTTP response") from exc
+        raise AgentError(f"{provider_name} returned a non-JSON HTTP response") from exc
     return parse_json_object(extract_response_content(body))
 
 
-def generate_project_idea(root: Path, settings: Settings, existing: list[ExistingIdea]) -> ProjectIdea:
+def generate_with_provider(
+    root: Path,
+    settings: Settings,
+    existing: list[ExistingIdea],
+    *,
+    provider_name: str,
+    api_key: str,
+    api_url: str,
+    model: str,
+) -> ProjectIdea:
     previous_error = ""
     for attempt in range(1, 4):
-        log(f"Requesting exactly one project idea from AI_API (attempt {attempt}/3)")
+        log(
+            f"Requesting exactly one project idea from {provider_name} "
+            f"using {model} (attempt {attempt}/3)"
+        )
         try:
-            raw_idea = call_ai_api(settings, existing, previous_error)
+            raw_idea = call_ai_api(
+                settings,
+                existing,
+                previous_error,
+                provider_name=provider_name,
+                api_key=api_key,
+                api_url=api_url,
+                model=model,
+            )
             idea = normalize_idea(raw_idea, root)
             validate_not_duplicate(idea, existing)
             return idea
         except AgentError as exc:
             previous_error = str(exc)
             log(f"Attempt {attempt} rejected: {previous_error}")
-    raise AgentError(f"Could not generate one valid unique idea after 3 attempts: {previous_error}")
+    raise AgentError(
+        f"{provider_name} could not generate one valid unique idea after 3 attempts: {previous_error}"
+    )
+
+
+def generate_project_idea(root: Path, settings: Settings, existing: list[ExistingIdea]) -> ProjectIdea:
+    try:
+        return generate_with_provider(
+            root,
+            settings,
+            existing,
+            provider_name="primary AI API",
+            api_key=settings.api_key,
+            api_url=settings.api_url,
+            model=settings.model,
+        )
+    except AgentError as primary_error:
+        if not settings.xai_api_key:
+            raise
+        log(f"Primary AI API failed: {primary_error}")
+        log("Switching to the configured xAI fallback")
+        return generate_with_provider(
+            root,
+            settings,
+            existing,
+            provider_name="xAI fallback",
+            api_key=settings.xai_api_key,
+            api_url=settings.xai_api_url,
+            model=settings.xai_model,
+        )
 
 
 def verify_git_repository(root: Path) -> None:

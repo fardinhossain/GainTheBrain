@@ -41,6 +41,10 @@ cp .env.example .env
 AI_API_KEY=your_api_key
 AI_API_URL=https://your-openai-compatible-endpoint/v1/chat/completions
 AI_MODEL=your_model_name
+# Optional xAI fallback; X_AI_API_KEY is also accepted
+XAI_API_KEY=your_xai_api_key
+XAI_API_URL=https://api.x.ai/v1/chat/completions
+XAI_MODEL=grok-4.3
 GIT_COMMIT_NAME=Fardin Hossain
 GIT_COMMIT_EMAIL=iamfardin.swe@gmail.com
 GITHUB_BRANCH=main
@@ -71,6 +75,14 @@ Add these repository secrets in GitHub under **Settings -> Secrets and variables
 - `AI_MODEL`
 - `GIT_COMMIT_NAME`
 - `GIT_COMMIT_EMAIL`
+
+Optional xAI fallback secrets:
+
+- `XAI_API_KEY` or `X_AI_API_KEY`
+- `XAI_API_URL` (defaults to `https://api.x.ai/v1/chat/completions`)
+- `XAI_MODEL` (defaults to `grok-4.3`)
+
+Gemini remains the primary provider. If it cannot produce a valid unique idea after three attempts, the agent automatically tries xAI up to three times. xAI API calls are billed according to your xAI account.
 
 Set `GIT_COMMIT_NAME` and `GIT_COMMIT_EMAIL` to your GitHub profile name and a GitHub-verified email address. Commits only appear in your GitHub contribution graph when the commit author email is verified on that GitHub account.
 
