@@ -2,6 +2,7 @@ import importlib.util
 import sys
 import tempfile
 import unittest
+from datetime import date
 from pathlib import Path
 from unittest.mock import patch
 
@@ -15,7 +16,10 @@ SPEC.loader.exec_module(agent)
 
 
 def valid_readme(title="Fresh Idea"):
-    sections = "\n\n".join(f"{heading}\n\nMeaningful content." for heading in agent.REQUIRED_README_SECTIONS)
+    sections = "\n\n".join(
+        f"{heading}\n\n{date.today().isoformat() if heading == '## Date' else 'Meaningful content.'}"
+        for heading in agent.REQUIRED_README_SECTIONS
+    )
     return f"# {title}\n\n{sections}\n"
 
 
@@ -81,6 +85,18 @@ class AgentTests(unittest.TestCase):
             agent.write_project_readme(idea)
             with self.assertRaises(agent.AgentError):
                 agent.write_project_readme(idea)
+
+    def test_reads_project_date_for_daily_guard(self):
+        with tempfile.TemporaryDirectory() as directory:
+            readme = Path(directory) / "README.md"
+            readme.write_text(valid_readme(), encoding="utf-8")
+            self.assertEqual(agent.read_project_date(readme), date.today().isoformat())
+
+    def test_rejects_readme_with_wrong_date(self):
+        with tempfile.TemporaryDirectory() as directory:
+            raw = valid_raw(readme=valid_readme().replace(date.today().isoformat(), "2000-01-01"))
+            with self.assertRaises(agent.AgentError):
+                agent.normalize_idea(raw, Path(directory))
 
     def test_openai_compatible_response_contract(self):
         class Response:

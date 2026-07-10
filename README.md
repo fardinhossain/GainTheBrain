@@ -2,20 +2,20 @@
 
 # 🧠 GainTheBrain
 
-### *Your daily dose of developer inspiration — project ideas, tech news, and AI innovation*
+### *One carefully classified project idea every day*
 
 [![Stars](https://img.shields.io/github/stars/fardinhossain/GainTheBrain?style=for-the-badge&logo=github&color=f5c542)](https://github.com/fardinhossain/GainTheBrain/stargazers)
 [![Forks](https://img.shields.io/github/forks/fardinhossain/GainTheBrain?style=for-the-badge&logo=github&color=4287f5)](https://github.com/fardinhossain/GainTheBrain/network/members)
 [![License: MIT](https://img.shields.io/badge/License-MIT-brightgreen?style=for-the-badge)](LICENSE)
-[![Updated Daily](https://img.shields.io/badge/Updated-Daily-blueviolet?style=for-the-badge&logo=clockify&logoColor=white)](#-fresh-content-daily)
+[![One Project Daily](https://img.shields.io/badge/One_Project-Daily-blueviolet?style=for-the-badge&logo=clockify&logoColor=white)](#-one-project-daily)
 
 <br/>
 
-**A curated, ever-growing collection of project ideas, programming news digests, and domain-driven AI blueprints — built for developers, students, and builders who want to sharpen their skills and stay ahead of the curve.**
+**A curated, ever-growing collection of project ideas and domain-driven AI blueprints — built for developers, students, and builders who want to sharpen their skills by building.**
 
 <br/>
 
-[Explore Projects](#-project-ideas) · [Read News Digests](#-news--industry-updates) · [AI Builders Congress](#-ai-builders-congress) · [Contribute](#-contributing)
+[Explore Projects](#-project-ideas) · [AI Builders Congress](#-ai-builders-congress) · [Contribute](#-contributing)
 
 ---
 
@@ -90,7 +90,7 @@ Open the failed run and expand **Validate agent secrets** or **Run daily project
 
 ## 📖 What Is GainTheBrain?
 
-**GainTheBrain** is an open-source knowledge hub designed to fuel your next project, keep you informed about the tech landscape, and inspire you to build impactful software.
+**GainTheBrain** is an open-source project-idea archive designed to inspire you to build impactful software.
 
 Whether you're a **Computer Science student** looking for your next capstone idea, a **full-stack developer** hunting for a weekend build, or an **AI enthusiast** eager to tackle a real-world problem — this repo has something for you.
 
@@ -98,8 +98,7 @@ Inside, you'll find:
 
 | What You Get | Why It Matters |
 |:---|:---|
-| 🛠️ **Project Ideas** | Detailed, actionable project briefs across 12 domains — from AI/ML to IoT |
-| 📰 **News Digests** | Curated summaries of developer-relevant headlines, trends, and releases |
+| 🛠️ **Project Ideas** | Detailed, actionable project briefs across 14 categories — from AI/ML to IoT |
 | 🏛️ **AI Builders Congress** | Domain-specific AI project blueprints organized by real-world industry verticals |
 
 Every idea includes context, suggested tech stacks, difficulty levels, and real-world relevance — so you can go from *"What should I build?"* to *"Let's ship it"* in minutes.
@@ -110,7 +109,7 @@ Every idea includes context, suggested tech stacks, difficulty levels, and real-
 
 ## 🗂️ Repository Structure
 
-The repository is organized into three major pillars. Click any folder to explore.
+The repository is organized into two project collections. Click any folder to explore.
 
 <br/>
 
@@ -136,27 +135,8 @@ project-ideas/
 | 📂 [`iot-embedded/`](project-ideas/iot-embedded/) | IoT & Embedded Systems | Sensor networks, edge computing, hardware interfaces |
 | 📂 [`blockchain/`](project-ideas/blockchain/) | Blockchain | Smart contracts, DeFi protocols, decentralized apps |
 | 📂 [`productivity-tools/`](project-ideas/productivity-tools/) | Productivity Tools | Developer utilities, CLI tools, workflow automation |
-
-<br/>
-
-### 📰 News & Industry Updates
-
-> Concise, developer-focused digests of what's happening in the tech world — so you don't have to scroll through a hundred feeds.
-
-```
-news/
-```
-
-| Folder | Beat | What's Covered |
-|:---|:---|:---|
-| 📂 [`ai-ml/`](news/ai-ml/) | AI & Machine Learning | Model releases, research breakthroughs, policy updates |
-| 📂 [`software-engineering/`](news/software-engineering/) | Software Engineering | Best practices, tooling shifts, engineering culture |
-| 📂 [`full-stack-development/`](news/full-stack-development/) | Full-Stack Development | Framework updates, stack comparisons, architecture trends |
-| 📂 [`web-development/`](news/web-development/) | Web Development | Browser updates, CSS/JS evolution, accessibility news |
-| 📂 [`devtools-frameworks/`](news/devtools-frameworks/) | DevTools & Frameworks | New releases, migrations, ecosystem changes |
-| 📂 [`cybersecurity/`](news/cybersecurity/) | Cybersecurity | Vulnerabilities, patches, threat intelligence |
-| 📂 [`cloud-devops/`](news/cloud-devops/) | Cloud & DevOps | Cloud provider updates, Kubernetes, observability |
-| 📂 [`programming-languages/`](news/programming-languages/) | Programming Languages | Language releases, RFCs, community governance |
+| 📂 [`developer-tools/`](project-ideas/developer-tools/) | Developer Tools | CLIs, editor extensions, API tools, Git helpers, debugging tools |
+| 📂 [`programming-education/`](project-ideas/programming-education/) | Programming Education | Coding practice, CS learning, exam preparation, teaching tools |
 
 <br/>
 
@@ -190,7 +170,7 @@ ai-builders-congress/
 <table>
 <tr>
 <td width="60">🔍</td>
-<td><strong>Browse by Interest</strong> — Navigate to a domain folder and explore the project briefs or news files inside.</td>
+<td><strong>Browse by Interest</strong> — Navigate to a category or AI Builders Congress domain and explore its project briefs.</td>
 </tr>
 <tr>
 <td>⭐</td>
@@ -199,10 +179,6 @@ ai-builders-congress/
 <tr>
 <td>📥</td>
 <td><strong>Clone &amp; Build</strong> — Pick a project idea, fork or clone the repo, and start building. Each idea is designed to be self-contained.</td>
-</tr>
-<tr>
-<td>📰</td>
-<td><strong>Stay Informed</strong> — Check the <code>news/</code> directory regularly for curated digests on tools, frameworks, and industry shifts.</td>
 </tr>
 <tr>
 <td>🏛️</td>
@@ -222,10 +198,12 @@ cd GainTheBrain
 
 ---
 
-## 🔄 Fresh Content Daily
+## 🔄 One Project Daily
 
 > [!NOTE]
-> This repository is **updated daily** with new project ideas, fresh news digests, and expanded AI Builders Congress blueprints. Content is curated and generated to ensure quality, relevance, and originality.
+> This repository adds **exactly one project idea per successful daily agent run**. The idea is saved under its most relevant `project-ideas/` category or `ai-builders-congress/` domain.
+
+If the workflow is re-run after today's project has already been added, the agent exits without generating or committing another one.
 
 Each file is timestamped so you can track what's new. Check back often — or watch the repo for release notifications.
 
@@ -246,7 +224,6 @@ Contributions are welcome and encouraged! Here's how you can help:
 
 **Contribution ideas:**
 - Submit a new project idea with a clear problem statement, tech stack, and difficulty level
-- Write a news digest summarizing recent developments in a covered domain
 - Propose a new AI Builders Congress sphere or expand an existing one
 - Fix typos, improve formatting, or enhance existing content
 

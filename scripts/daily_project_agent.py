@@ -94,6 +94,7 @@ class ExistingIdea:
     title: str
     slug: str
     path: str
+    project_date: str = ""
 
 
 @dataclass(frozen=True)
@@ -198,6 +199,29 @@ def read_title(readme_path: Path) -> str:
     return readme_path.parent.name.replace("-", " ").title()
 
 
+def read_markdown_section(markdown: str, heading: str) -> str:
+    lines = markdown.splitlines()
+    for index, line in enumerate(lines):
+        if line.strip() != heading:
+            continue
+        for candidate in lines[index + 1 :]:
+            stripped = candidate.strip()
+            if stripped.startswith("## "):
+                return ""
+            if stripped:
+                return stripped
+    return ""
+
+
+def read_project_date(readme_path: Path) -> str:
+    try:
+        markdown = readme_path.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return ""
+    value = read_markdown_section(markdown, "## Date")
+    return value if re.fullmatch(r"\d{4}-\d{2}-\d{2}", value) else ""
+
+
 def scan_existing_ideas(root: Path) -> list[ExistingIdea]:
     log("Scanning existing titles, slugs, and README.md paths")
     ideas: list[ExistingIdea] = []
@@ -208,6 +232,7 @@ def scan_existing_ideas(root: Path) -> list[ExistingIdea]:
                     title=read_title(readme),
                     slug=readme.parent.name,
                     path=readme.relative_to(root).as_posix(),
+                    project_date=read_project_date(readme),
                 )
             )
     log(f"Found {len(ideas)} existing project ideas")
@@ -297,6 +322,11 @@ def normalize_idea(raw: dict[str, Any], root: Path) -> ProjectIdea:
     if missing_sections:
         raise AgentError("README is missing sections: " + ", ".join(missing_sections))
 
+    readme_date = read_markdown_section(readme, "## Date")
+    expected_date = date.today().isoformat()
+    if readme_date != expected_date:
+        raise AgentError(f"README Date must be {expected_date}, received {readme_date or '<empty>'}")
+
     slug = slugify(str(raw.get("slug", "")).strip() or title, lowercase=True)
     if not slug or not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", slug):
         raise AgentError("AI response could not be converted to a safe lowercase slug")
@@ -350,7 +380,13 @@ Choose the most accurate allowed folder and produce a detailed, buildable README
 
 def build_user_prompt(existing: list[ExistingIdea], previous_error: str = "") -> str:
     existing_payload = [
-        {"title": idea.title, "slug": idea.slug, "path": idea.path} for idea in existing
+        {
+            "title": idea.title,
+            "slug": idea.slug,
+            "path": idea.path,
+            "date": idea.project_date,
+        }
+        for idea in existing
     ]
     retry_note = f"\nThe previous response was rejected: {previous_error}\nGenerate a different valid idea." if previous_error else ""
     return f"""Today is {date.today().isoformat()}.
@@ -508,6 +544,10 @@ def main() -> int:
         configure_git(root, settings)
         create_base_folders(root)
         existing = scan_existing_ideas(root)
+        today = date.today().isoformat()
+        if any(idea.project_date == today for idea in existing):
+            log(f"A project idea already exists for {today}; skipping generation and commit")
+            return 0
         idea = generate_project_idea(root, settings, existing)
         write_project_readme(idea)
         commit_and_push(root, settings, idea)
