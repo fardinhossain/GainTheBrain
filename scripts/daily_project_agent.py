@@ -507,6 +507,37 @@ def write_project_readme(idea: ProjectIdea) -> None:
         raise AgentError(f"Refusing to overwrite existing file: {idea.file_path}") from exc
 
 
+def push_with_rebase_retry(root: Path, settings: Settings, idea: ProjectIdea) -> bool:
+    push_args = ["git", "push", "origin", f"HEAD:{settings.branch}"]
+    result = run_command(push_args, cwd=root, check=False)
+    if result.returncode == 0:
+        return True
+
+    output = f"{result.stdout}\n{result.stderr}".lower()
+    if "non-fast-forward" not in output and "rejected" not in output:
+        raise AgentError(f"Git push failed with exit code {result.returncode}")
+
+    log("Remote main advanced during this run; rebasing once and retrying the push")
+    run_command(["git", "pull", "--rebase", "origin", settings.branch], cwd=root)
+
+    relative_path = idea.file_path.relative_to(root).as_posix()
+    today = date.today().isoformat()
+    other_today_projects = [
+        existing
+        for existing in scan_existing_ideas(root)
+        if existing.project_date == today and existing.path != relative_path
+    ]
+    if other_today_projects:
+        log(
+            f"Remote main already contains a project for {today}; "
+            "skipping this push to preserve one project per day"
+        )
+        return False
+
+    run_command(push_args, cwd=root)
+    return True
+
+
 def commit_and_push(root: Path, settings: Settings, idea: ProjectIdea) -> None:
     relative_path = idea.file_path.relative_to(root).as_posix()
     status = run_command(
@@ -529,7 +560,8 @@ def commit_and_push(root: Path, settings: Settings, idea: ProjectIdea) -> None:
     if settings.skip_push:
         log("SKIP_GIT_PUSH is enabled; the commit was created locally but not pushed")
     else:
-        run_command(["git", "push", "origin", f"HEAD:{settings.branch}"], cwd=root)
+        if not push_with_rebase_retry(root, settings, idea):
+            return
     log(f"Success: created {relative_path}")
     log(f"Commit message: {idea.commit_message}")
 

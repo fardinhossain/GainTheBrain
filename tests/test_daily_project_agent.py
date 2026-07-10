@@ -1,4 +1,5 @@
 import importlib.util
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -37,6 +38,18 @@ def valid_raw(**changes):
     }
     raw.update(changes)
     return raw
+
+
+def test_settings():
+    return agent.Settings(
+        api_key="secret",
+        api_url="https://example.test/v1/chat/completions",
+        model="test-model",
+        git_name="Fardin Hossain",
+        git_email="iamfardin.swe@gmail.com",
+        branch="main",
+        skip_push=False,
+    )
 
 
 class AgentTests(unittest.TestCase):
@@ -97,6 +110,19 @@ class AgentTests(unittest.TestCase):
             raw = valid_raw(readme=valid_readme().replace(date.today().isoformat(), "2000-01-01"))
             with self.assertRaises(agent.AgentError):
                 agent.normalize_idea(raw, Path(directory))
+
+    def test_non_fast_forward_push_rebases_and_retries_once(self):
+        rejected = subprocess.CompletedProcess(
+            args=[], returncode=1, stdout="", stderr="[rejected] non-fast-forward"
+        )
+        succeeded = subprocess.CompletedProcess(args=[], returncode=0, stdout="", stderr="")
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            idea = agent.normalize_idea(valid_raw(), root)
+            with patch.object(agent, "run_command", side_effect=[rejected, succeeded, succeeded]) as run:
+                with patch.object(agent, "scan_existing_ideas", return_value=[]):
+                    self.assertTrue(agent.push_with_rebase_retry(root, test_settings(), idea))
+        self.assertEqual(run.call_count, 3)
 
     def test_openai_compatible_response_contract(self):
         class Response:

@@ -85,6 +85,7 @@ Open the failed run and expand **Validate agent secrets** or **Run daily project
 - `HTTP 404`: set `AI_API_URL` to the full chat-completions endpoint, usually ending in `/v1/chat/completions`.
 - `HTTP 429`: the API account has reached a rate or credit limit.
 - `Invalid category`, `duplicate`, or `invalid JSON`: the agent retries automatically up to three times.
+- `non-fast-forward`: the agent rebases onto the latest `main` once and retries automatically.
 
 <br/>
 
