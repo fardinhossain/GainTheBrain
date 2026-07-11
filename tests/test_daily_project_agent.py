@@ -9,6 +9,7 @@ from unittest.mock import patch
 
 
 SCRIPT = Path(__file__).resolve().parents[1] / "scripts" / "daily_project_agent.py"
+sys.path.insert(0, str(SCRIPT.parent))
 SPEC = importlib.util.spec_from_file_location("daily_project_agent", SCRIPT)
 agent = importlib.util.module_from_spec(SPEC)
 assert SPEC and SPEC.loader
@@ -222,6 +223,32 @@ class AgentTests(unittest.TestCase):
                 agent.call_ai_api(settings, [], "")
         self.assertNotIn("secret-value", str(raised.exception))
         self.assertIn("[REDACTED]", str(raised.exception))
+
+    def test_commit_and_push_stages_only_the_project_readme(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            idea = agent.normalize_idea(valid_raw(), root)
+            readme = idea.file_path
+            readme.parent.mkdir(parents=True, exist_ok=True)
+            readme.write_text(valid_readme(), encoding="utf-8")
+            status = subprocess.CompletedProcess(args=[], returncode=0, stdout=" M README.md", stderr="")
+            diff = subprocess.CompletedProcess(args=[], returncode=1, stdout="", stderr="")
+            commit = subprocess.CompletedProcess(args=[], returncode=0, stdout="", stderr="")
+            settings = agent.Settings(
+                api_key="secret",
+                api_url="https://example.test/v1/chat/completions",
+                model="test-model",
+                git_name="Fardin Hossain",
+                git_email="iamfardin.swe@gmail.com",
+                branch="main",
+                skip_push=True,
+            )
+
+            with patch.object(agent, "run_command", side_effect=[status, commit, diff, commit]) as run:
+                agent.commit_and_push(root, settings, idea, [readme])
+
+        added_paths = run.call_args_list[1].args[0]
+        self.assertEqual(added_paths, ["git", "add", "--", "project-ideas/developer-tools/fresh-idea/README.md"])
 
 
 if __name__ == "__main__":

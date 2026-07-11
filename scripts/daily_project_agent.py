@@ -18,7 +18,6 @@ import requests
 from dotenv import load_dotenv
 from slugify import slugify
 
-
 PROJECT_CATEGORIES = {
     "general-cs",
     "ai-ml",
@@ -628,31 +627,31 @@ def push_with_rebase_retry(root: Path, settings: Settings, idea: ProjectIdea) ->
     return True
 
 
-def commit_and_push(root: Path, settings: Settings, idea: ProjectIdea) -> None:
-    relative_path = idea.file_path.relative_to(root).as_posix()
+def commit_and_push(root: Path, settings: Settings, idea: ProjectIdea, paths: list[Path]) -> None:
+    relative_paths = [path.relative_to(root).as_posix() for path in paths]
     status = run_command(
-        ["git", "status", "--porcelain", "--untracked-files=all", "--", relative_path],
+        ["git", "status", "--porcelain", "--untracked-files=all", "--", *relative_paths],
         cwd=root,
     )
     if not status.stdout.strip():
-        log("No new project file was detected; skipping commit and push")
+        log("No project idea changes were detected; skipping commit and push")
         return
 
-    run_command(["git", "add", "--", relative_path], cwd=root)
-    staged = run_command(["git", "diff", "--cached", "--quiet", "--", relative_path], cwd=root, check=False)
+    run_command(["git", "add", "--", *relative_paths], cwd=root)
+    staged = run_command(["git", "diff", "--cached", "--quiet", "--", *relative_paths], cwd=root, check=False)
     if staged.returncode == 0:
         log("Nothing was staged; skipping empty commit")
         return
     if staged.returncode != 1:
-        raise AgentError("Could not inspect staged project file")
+        raise AgentError("Could not inspect staged project idea files")
 
-    run_command(["git", "commit", "-m", idea.commit_message, "--", relative_path], cwd=root)
+    run_command(["git", "commit", "-m", idea.commit_message, "--", *relative_paths], cwd=root)
     if settings.skip_push:
         log("SKIP_GIT_PUSH is enabled; the commit was created locally but not pushed")
     else:
         if not push_with_rebase_retry(root, settings, idea):
             return
-    log(f"Success: created {relative_path}")
+    log(f"Success: updated {', '.join(relative_paths)}")
     log(f"Commit message: {idea.commit_message}")
 
 
@@ -672,7 +671,7 @@ def main() -> int:
             return 0
         idea = generate_project_idea(root, settings, existing)
         write_project_readme(idea)
-        commit_and_push(root, settings, idea)
+        commit_and_push(root, settings, idea, [idea.file_path])
         return 0
     except AgentError as exc:
         print(f"ERROR: {exc}", file=sys.stderr, flush=True)
