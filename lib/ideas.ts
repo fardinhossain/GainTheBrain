@@ -1,4 +1,5 @@
 import { readdir, readFile } from "node:fs/promises";
+import path from "node:path";
 
 const IDEA_ROOTS = [
   {
@@ -197,21 +198,23 @@ async function safeReadDir(target: string) {
 
 async function collectReadmes() {
   const readmes: ReadmeFile[] = [];
+  const root = process.cwd();
 
   for (const ideaRoot of IDEA_ROOTS) {
-    const folders = await safeReadDir(ideaRoot.directory);
+    const absoluteDir = path.join(root, ideaRoot.directory);
+    const folders = await safeReadDir(absoluteDir);
     for (const folder of folders) {
       if (!folder.isDirectory()) {
         continue;
       }
-      const folderPath = `${ideaRoot.directory}/${folder.name}`;
+      const folderPath = path.join(absoluteDir, folder.name);
       const projects = await safeReadDir(folderPath);
       for (const project of projects) {
         if (!project.isDirectory()) {
           continue;
         }
         readmes.push({
-          absolutePath: `${folderPath}/${project.name}/README.md`,
+          absolutePath: path.join(folderPath, project.name, "README.md"),
           relativePath: `${ideaRoot.base}/${folder.name}/${project.name}/README.md`,
         });
       }
