@@ -4,12 +4,14 @@ import {
   ArrowUpDown,
   BrainCircuit,
   CalendarDays,
-  FileDown,
   FolderTree,
   Loader2,
+  Moon,
   Search,
   Send,
+  ShieldCheck,
   Sparkles,
+  Sun,
   Tag,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -27,6 +29,7 @@ type AskState = {
 };
 
 type SortKey = "newest" | "oldest" | "title";
+type Theme = "light" | "dark";
 
 const SORT_LABELS: Record<SortKey, string> = {
   newest: "Newest first",
@@ -68,9 +71,28 @@ export function IdeaWorkspace({ catalog }: IdeaWorkspaceProps) {
   const [selectedId, setSelectedId] = useState(catalog.projects[0]?.id || "");
   const [question, setQuestion] = useState("");
   const [askState, setAskState] = useState<AskState>({ status: "idle", answer: "", error: "" });
+  const [theme, setTheme] = useState<Theme>("light");
+  const [mounted, setMounted] = useState(false);
 
   const readerRef = useRef<HTMLElement | null>(null);
   const entryRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+
+  // Sync theme state with the value the pre-paint script already applied.
+  useEffect(() => {
+    setMounted(true);
+    setTheme(document.documentElement.dataset.theme === "dark" ? "dark" : "light");
+  }, []);
+
+  function toggleTheme() {
+    const next: Theme = theme === "dark" ? "light" : "dark";
+    setTheme(next);
+    document.documentElement.dataset.theme = next;
+    try {
+      localStorage.setItem("gtb-theme", next);
+    } catch {
+      // Ignore storage failures (private mode etc.) — theme still applies for the session.
+    }
+  }
 
   // Stable log number per idea: oldest entry is #001, newest is the highest.
   const logNumbers = useMemo(() => {
@@ -176,10 +198,6 @@ export function IdeaWorkspace({ catalog }: IdeaWorkspaceProps) {
     }
   }
 
-  function handleSaveAsPdf() {
-    window.print();
-  }
-
   async function askAssistant(rawQuestion?: string) {
     const asked = (rawQuestion ?? question).trim();
     if (!asked || !selectedIdea) {
@@ -206,6 +224,8 @@ export function IdeaWorkspace({ catalog }: IdeaWorkspaceProps) {
       });
     }
   }
+
+  const isDark = theme === "dark";
 
   return (
     <main className="app-shell">
@@ -249,20 +269,31 @@ export function IdeaWorkspace({ catalog }: IdeaWorkspaceProps) {
             type="search"
           />
         </label>
-        <div className="sort-box">
-          <ArrowUpDown aria-hidden="true" />
-          <label htmlFor="sort">Sort</label>
-          <select
-            id="sort"
-            value={sort}
-            onChange={(event) => setSort(event.target.value as SortKey)}
+        <div className="controls-right">
+          <div className="sort-box">
+            <ArrowUpDown aria-hidden="true" />
+            <label htmlFor="sort">Sort</label>
+            <select
+              id="sort"
+              value={sort}
+              onChange={(event) => setSort(event.target.value as SortKey)}
+            >
+              {(Object.keys(SORT_LABELS) as SortKey[]).map((key) => (
+                <option key={key} value={key}>
+                  {SORT_LABELS[key]}
+                </option>
+              ))}
+            </select>
+          </div>
+          <button
+            className="theme-toggle"
+            type="button"
+            onClick={toggleTheme}
+            aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+            title={isDark ? "Switch to light mode" : "Switch to dark mode"}
           >
-            {(Object.keys(SORT_LABELS) as SortKey[]).map((key) => (
-              <option key={key} value={key}>
-                {SORT_LABELS[key]}
-              </option>
-            ))}
-          </select>
+            {mounted && isDark ? <Sun aria-hidden="true" /> : <Moon aria-hidden="true" />}
+          </button>
         </div>
       </div>
 
@@ -360,24 +391,13 @@ export function IdeaWorkspace({ catalog }: IdeaWorkspaceProps) {
           {selectedIdea ? (
             <>
               <div className="reader-head">
-                <div className="reader-head-top">
-                  <div className="reader-kicker">
-                    <span className="mono">
-                      #{String(logNumbers.get(selectedIdea.id) ?? 0).padStart(3, "0")}
-                    </span>
-                    <span className="k-accent">{selectedIdea.collectionLabel}</span>
-                    <span>&middot;</span>
-                    <span>{selectedIdea.categoryText}</span>
-                  </div>
-                  <button
-                    className="btn-pdf"
-                    onClick={handleSaveAsPdf}
-                    title="Save as PDF"
-                    type="button"
-                  >
-                    <FileDown aria-hidden="true" />
-                    Save as PDF
-                  </button>
+                <div className="reader-kicker">
+                  <span className="mono">
+                    #{String(logNumbers.get(selectedIdea.id) ?? 0).padStart(3, "0")}
+                  </span>
+                  <span className="k-accent">{selectedIdea.collectionLabel}</span>
+                  <span>&middot;</span>
+                  <span>{selectedIdea.categoryText}</span>
                 </div>
                 <h2>{selectedIdea.title}</h2>
                 <div className="reader-badges">
@@ -405,10 +425,6 @@ export function IdeaWorkspace({ catalog }: IdeaWorkspaceProps) {
                     <Sparkles aria-hidden="true" />
                     <div>
                       <h3>Ask about this idea</h3>
-                      <p>
-                        Runs server-side against this entry only. Your API key stays on the
-                        server and never reaches the browser.
-                      </p>
                     </div>
                   </div>
                   <div className="ask-row">
@@ -490,7 +506,10 @@ export function IdeaWorkspace({ catalog }: IdeaWorkspaceProps) {
 
       <footer className="app-foot">
         <span>GainTheBrain &middot; private idea reader</span>
-        <span>Made by Fardin</span>
+        <span className="secure-tag">
+          <ShieldCheck aria-hidden="true" />
+          AI key kept server-side
+        </span>
       </footer>
     </main>
   );

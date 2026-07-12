@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7c3aed"/>
+      <stop offset="100%" stop-color="#4f46e5"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="url(#bg)"/>
+  <g transform="translate(12, 10)" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Left hemisphere -->
+    <path d="M20 4C15 4 10 6 8 10C5 14 4 18 5 22C4 24 3 27 4 30C3 33 4 36 6 38C7 40 9 42 12 43L20 43"/>
+    <!-- Right hemisphere -->
+    <path d="M20 4C25 4 30 6 32 10C35 14 36 18 35 22C36 24 37 27 36 30C37 33 36 36 34 38C33 40 31 42 28 43L20 43"/>
+    <!-- Center line -->
+    <path d="M20 4L20 43"/>
+    <!-- Brain folds left -->
+    <path d="M8 18C12 18 16 16 20 18"/>
+    <path d="M6 30C10 28 15 30 20 28"/>
+    <!-- Brain folds right -->
+    <path d="M32 18C28 18 24 16 20 18"/>
+    <path d="M34 30C30 28 25 30 20 28"/>
+  </g>
+</svg>
