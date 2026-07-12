@@ -4,11 +4,11 @@ import {
   ArrowUpDown,
   BrainCircuit,
   CalendarDays,
+  FileDown,
   FolderTree,
   Loader2,
   Search,
   Send,
-  ShieldCheck,
   Sparkles,
   Tag,
 } from "lucide-react";
@@ -174,6 +174,10 @@ export function IdeaWorkspace({ catalog }: IdeaWorkspaceProps) {
       entryRefs.current[next.id]?.scrollIntoView({ block: "nearest" });
       entryRefs.current[next.id]?.focus();
     }
+  }
+
+  function handleSaveAsPdf() {
+    window.print();
   }
 
   async function askAssistant(rawQuestion?: string) {
@@ -356,13 +360,24 @@ export function IdeaWorkspace({ catalog }: IdeaWorkspaceProps) {
           {selectedIdea ? (
             <>
               <div className="reader-head">
-                <div className="reader-kicker">
-                  <span className="mono">
-                    #{String(logNumbers.get(selectedIdea.id) ?? 0).padStart(3, "0")}
-                  </span>
-                  <span className="k-accent">{selectedIdea.collectionLabel}</span>
-                  <span>&middot;</span>
-                  <span>{selectedIdea.categoryText}</span>
+                <div className="reader-head-top">
+                  <div className="reader-kicker">
+                    <span className="mono">
+                      #{String(logNumbers.get(selectedIdea.id) ?? 0).padStart(3, "0")}
+                    </span>
+                    <span className="k-accent">{selectedIdea.collectionLabel}</span>
+                    <span>&middot;</span>
+                    <span>{selectedIdea.categoryText}</span>
+                  </div>
+                  <button
+                    className="btn-pdf"
+                    onClick={handleSaveAsPdf}
+                    title="Save as PDF"
+                    type="button"
+                  >
+                    <FileDown aria-hidden="true" />
+                    Save as PDF
+                  </button>
                 </div>
                 <h2>{selectedIdea.title}</h2>
                 <div className="reader-badges">
@@ -475,10 +490,7 @@ export function IdeaWorkspace({ catalog }: IdeaWorkspaceProps) {
 
       <footer className="app-foot">
         <span>GainTheBrain &middot; private idea reader</span>
-        <span className="secure-tag">
-          <ShieldCheck aria-hidden="true" />
-          AI key kept server-side
-        </span>
+        <span>Made by Fardin</span>
       </footer>
     </main>
   );

@@ -1074,3 +1074,206 @@ select:focus-visible,
     scroll-behavior: auto !important;
   }
 }
+
+/* ─── Save as PDF button ──────────────────────────────────────────────── */
+.reader-head-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.btn-pdf {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
+  box-shadow: 0 2px 6px rgba(53, 56, 205, 0.35);
+}
+
+.btn-pdf:hover {
+  background: var(--accent-ink);
+  box-shadow: 0 4px 14px rgba(53, 56, 205, 0.45);
+  transform: translateY(-1px);
+}
+
+.btn-pdf:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 4px rgba(53, 56, 205, 0.25);
+}
+
+.btn-pdf svg {
+  width: 15px;
+  height: 15px;
+}
+
+/* ─── Print / Save as PDF styles ─────────────────────────────────────── */
+@media print {
+  /* Hide everything except the reader section */
+  .masthead,
+  .controls,
+  .filters,
+  .ledger,
+  .assistant,
+  .app-foot,
+  .btn-pdf,
+  .reader-badges {
+    display: none !important;
+  }
+
+  /* Reset layout so reader fills the page */
+  body {
+    background: #fff !important;
+    background-image: none !important;
+    color: #000 !important;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 11pt;
+    margin: 0;
+    padding: 0;
+  }
+
+  .app-shell {
+    display: block !important;
+  }
+
+  .workspace {
+    display: block !important;
+  }
+
+  .reader {
+    all: unset;
+    display: block;
+    width: 100%;
+    overflow: visible !important;
+    height: auto !important;
+    color: #000;
+  }
+
+  /* Reader head */
+  .reader-head {
+    padding: 0 0 18pt 0;
+    border-bottom: 2pt solid #000;
+    margin-bottom: 18pt;
+    page-break-inside: avoid;
+  }
+
+  .reader-head-top {
+    display: block;
+  }
+
+  .reader-kicker {
+    font-size: 8pt;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #555;
+    margin-bottom: 6pt;
+  }
+
+  .reader-head h2 {
+    font-size: 22pt;
+    font-weight: 700;
+    line-height: 1.2;
+    margin: 0 0 8pt 0;
+    color: #000;
+  }
+
+  .reader-summary {
+    font-size: 10.5pt;
+    color: #333;
+    margin: 0;
+  }
+
+  /* Sections */
+  .reader-scroll {
+    all: unset;
+    display: block;
+    overflow: visible !important;
+  }
+
+  .section-stack {
+    display: block;
+  }
+
+  .idea-section {
+    page-break-inside: avoid;
+    margin-bottom: 18pt;
+  }
+
+  .idea-section h3 {
+    font-size: 12pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    border-bottom: 1pt solid #ccc;
+    padding-bottom: 4pt;
+    margin: 0 0 8pt 0;
+  }
+
+  /* Markdown content */
+  .md-body {
+    font-size: 10.5pt;
+    line-height: 1.6;
+    color: #111;
+  }
+
+  .md-body p {
+    margin: 0 0 8pt 0;
+  }
+
+  .md-body ul,
+  .md-body ol {
+    padding-left: 20pt;
+    margin: 0 0 8pt 0;
+  }
+
+  .md-body li {
+    margin-bottom: 3pt;
+  }
+
+  .md-body h1, .md-body h2, .md-body h3, .md-body h4 {
+    page-break-after: avoid;
+    color: #000;
+  }
+
+  .md-body code {
+    font-family: "Courier New", monospace;
+    font-size: 9pt;
+    background: #f4f4f4;
+    padding: 1pt 3pt;
+    border-radius: 2pt;
+  }
+
+  .md-body pre {
+    background: #f4f4f4 !important;
+    color: #111 !important;
+    padding: 8pt;
+    font-size: 8.5pt;
+    border: 1pt solid #ddd;
+    border-radius: 3pt;
+    white-space: pre-wrap;
+    page-break-inside: avoid;
+  }
+
+  /* Print footer with URL */
+  @page {
+    size: A4;
+    margin: 20mm 18mm;
+    @bottom-center {
+      content: "GainTheBrain · " attr(data-title);
+      font-size: 8pt;
+      color: #888;
+    }
+  }
+}
