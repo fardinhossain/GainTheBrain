@@ -98,8 +98,12 @@ export async function POST(request: Request) {
   const model = process.env.AI_MODEL?.trim();
 
   if (!apiKey || !apiUrl || !model) {
+    const missing = [];
+    if (!apiKey) missing.push("AI_API_KEY");
+    if (!apiUrl) missing.push("AI_API_URL");
+    if (!model) missing.push("AI_MODEL");
     return errorResponse(
-      "The idea assistant is not configured. Set AI_API_KEY, AI_API_URL, and AI_MODEL on the server.",
+      `The idea assistant is not configured. Missing: ${missing.join(", ")}. (API_KEY length: ${apiKey?.length || 0})`,
       503,
     );
   }
