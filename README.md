@@ -187,7 +187,7 @@ You are free to use, modify, and distribute the content in this repository, with
 
 **If this repo helps you learn, build, or stay informed — give it a ⭐**
 
-Made with 🧠 by [Fardin Hossain](https://github.com/fardinhossain) and contributors
+Made with 🧠 by [Md. Fardin Hossain](https://github.com/fardinhossain) and contributors
 
 <br/>
 
