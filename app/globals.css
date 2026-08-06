@@ -1566,14 +1566,14 @@ select:focus-visible,
   .idea-section p {
     font-size: 10pt;
     line-height: 1.7;
-    color: #1f2937;
+    color: #000000 !important;
     margin: 0 0 5pt;
   }
 
   .idea-section li {
     font-size: 10pt;
     line-height: 1.65;
-    color: #1f2937;
+    color: #000000 !important;
     margin-bottom: 3pt;
   }
 
@@ -1593,35 +1593,37 @@ select:focus-visible,
   }
 
   .idea-section strong {
-    color: #0f172a;
+    color: #000000 !important;
     font-weight: 700;
   }
 
   .idea-section em {
-    color: #374151;
+    color: #111827 !important;
   }
 
   .idea-section a {
-    color: #3538cd;
+    color: #1d4ed8 !important;
     text-decoration: underline;
   }
 
-  /* Inline code */
+  /* Inline code - bold black text with subtle grey background chip */
   .idea-section code {
     font-family: "Courier New", monospace;
     font-size: 8.5pt;
-    background: #e8eaff;
-    color: #3538cd;
-    padding: 0.5pt 3pt;
-    border-radius: 2pt;
+    background: #eef2ff !important;
+    color: #000000 !important;
+    font-weight: 600 !important;
+    padding: 1pt 4pt;
+    border: 0.5pt solid #c7d2fe !important;
+    border-radius: 3pt;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
 
   /* Code blocks */
   .idea-section pre {
-    background: #0f172a;
-    color: #e2e8f0;
+    background: #f8fafc !important;
+    color: #000000 !important;
     padding: 9pt 10pt;
     font-size: 8pt;
     font-family: "Courier New", monospace;
@@ -1632,7 +1634,8 @@ select:focus-visible,
     break-inside: avoid;
     border-radius: 4pt;
     margin: 6pt 0 4pt;
-    border-left: 3pt solid #6366f1;
+    border: 0.5pt solid #cbd5e1 !important;
+    border-left: 3.5pt solid #3538cd !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
