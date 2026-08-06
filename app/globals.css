@@ -1454,17 +1454,30 @@ select:focus-visible,
 /* ─── Print / PDF stylesheet ─────────────────────────────────────────────── */
 
 @media print {
-  /* Reset */
+  /* ── Reset ──────────────────────────────────────────────────────────────── */
   *,
   *::before,
   *::after {
     box-shadow: none !important;
     text-shadow: none !important;
+    animation: none !important;
+    transition: none !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
 
-  /* Hide everything except the reader content */
+  /* ── Page setup ─────────────────────────────────────────────────────────── */
+  @page {
+    size: A4;
+    margin: 14mm 18mm 18mm 24mm; /* extra left margin for accent bar */
+  }
+
+  /* First page — no top margin so the bar reaches the very top */
+  @page :first {
+    margin-top: 0;
+  }
+
+  /* ── Hide non-reader UI ─────────────────────────────────────────────────── */
   .masthead,
   .controls,
   .filters,
@@ -1475,19 +1488,34 @@ select:focus-visible,
     display: none !important;
   }
 
-  /* Full-page base */
+  /* ── Base ───────────────────────────────────────────────────────────────── */
   html,
   body {
     background: #fff !important;
-    color: #111 !important;
-    font-size: 11pt;
-    font-family: Georgia, "Times New Roman", serif;
+    color: #1a1a2e !important;
+    font-size: 10.5pt;
+    font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.65;
     margin: 0;
     padding: 0;
   }
 
   .app-shell {
     display: block !important;
+    position: relative;
+  }
+
+  /* ── Left accent bar ────────────────────────────────────────────────────── */
+  .app-shell::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 6mm;
+    height: 100%;
+    background: #3538cd;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 
   .workspace {
@@ -1512,19 +1540,42 @@ select:focus-visible,
     padding: 0 !important;
   }
 
-  /* Cover block */
+  /* ── Cover / header block ───────────────────────────────────────────────── */
   .reader-head {
-    border-bottom: 2pt solid #111;
-    padding-bottom: 12pt;
-    margin-bottom: 20pt;
+    padding: 14mm 0 10pt;
+    margin-bottom: 18pt;
+    border-bottom: 0;
+    position: relative;
   }
 
+  /* Thin decorative rule below cover */
+  .reader-head::after {
+    content: "";
+    display: block;
+    margin-top: 12pt;
+    height: 2pt;
+    background: linear-gradient(90deg, #3538cd 0%, #c6c8f2 60%, transparent 100%);
+    border-radius: 1pt;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Collection + number kicker */
   .reader-kicker {
-    font-size: 8pt;
-    letter-spacing: 0.12em;
+    display: flex;
+    align-items: center;
+    gap: 6pt;
+    font-size: 7.5pt;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: #555;
-    margin-bottom: 6pt;
+    color: #6b7280;
+    margin-bottom: 8pt;
+    font-weight: 600;
+  }
+
+  .reader-kicker .mono {
+    color: #9ca3af;
+    font-family: "Courier New", monospace;
   }
 
   .reader-kicker .k-accent {
@@ -1532,107 +1583,264 @@ select:focus-visible,
     font-weight: 700;
   }
 
+  /* Title row — stack vertically in print */
   .reader-title-row {
     display: block !important;
+    margin-bottom: 10pt;
   }
 
   .reader-title-row h2,
   .reader-head h2 {
-    font-size: 22pt;
+    font-size: 24pt;
     font-weight: 800;
-    line-height: 1.2;
-    margin: 0 0 10pt;
-    color: #111;
+    line-height: 1.15;
+    color: #0f172a;
+    margin: 0;
+    letter-spacing: -0.02em;
   }
 
+  /* Badge pills */
   .reader-badges {
-    display: flex;
-    gap: 16pt;
-    font-size: 8.5pt;
-    color: #444;
+    display: flex !important;
     flex-wrap: wrap;
-    margin-bottom: 8pt;
+    gap: 5pt;
+    margin-top: 8pt;
+    margin-bottom: 0;
   }
 
+  .reader-badges > span {
+    display: inline-flex;
+    align-items: center;
+    gap: 3pt;
+    font-size: 7.5pt;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    padding: 2pt 7pt;
+    border-radius: 20pt;
+    border: 0.75pt solid #c6c8f2;
+    color: #3538cd;
+    background: #eef0fd;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Hide icons inside badges */
   .reader-badges svg {
     display: none;
   }
 
+  /* Summary tagline */
   .reader-summary {
-    font-size: 10.5pt;
-    color: #333;
+    font-size: 10pt;
+    color: #374151;
     font-style: italic;
-    margin: 8pt 0 0;
-    line-height: 1.5;
+    margin: 10pt 0 0;
+    line-height: 1.6;
+    max-width: 92%;
+    border-left: 3pt solid #c6c8f2;
+    padding-left: 8pt;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 
-  /* Sections */
+  /* ── Section stack ──────────────────────────────────────────────────────── */
   .section-stack {
-    margin-top: 4pt;
+    margin-top: 8pt;
   }
 
   .idea-section {
     page-break-inside: avoid;
-    margin-bottom: 18pt;
+    break-inside: avoid;
+    margin-bottom: 14pt;
+    padding: 9pt 10pt 9pt 12pt;
+    border-left: 3pt solid #3538cd;
+    background: #f8f9ff;
+    border-radius: 0 4pt 4pt 0;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 
+  /* Alternate section background for visual rhythm */
+  .idea-section:nth-child(even) {
+    background: #f9fafb;
+    border-left-color: #6366f1;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Section heading */
   .idea-section h3 {
-    font-size: 10pt;
+    font-size: 7pt;
+    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.18em;
     color: #3538cd;
-    border-bottom: 0.5pt solid #c6c8f2;
-    padding-bottom: 3pt;
     margin: 0 0 6pt;
+    display: flex;
+    align-items: center;
+    gap: 5pt;
   }
 
+  .idea-section:nth-child(even) h3 {
+    color: #4f46e5;
+  }
+
+  /* Section number prefix */
   .idea-section h3::before {
-    content: attr(data-index) ". ";
-    color: #aaa;
+    content: attr(data-index);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 13pt;
+    height: 13pt;
+    background: #3538cd;
+    color: #fff;
+    font-size: 6pt;
+    font-weight: 800;
+    border-radius: 50%;
+    flex-shrink: 0;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 
-  /* Markdown content */
-  .idea-section p,
-  .idea-section li {
+  .idea-section:nth-child(even) h3::before {
+    background: #4f46e5;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* ── Markdown content ───────────────────────────────────────────────────── */
+  .idea-section p {
     font-size: 10pt;
     line-height: 1.7;
-    color: #222;
-    margin: 0 0 4pt;
+    color: #1f2937;
+    margin: 0 0 5pt;
+  }
+
+  .idea-section li {
+    font-size: 10pt;
+    line-height: 1.65;
+    color: #1f2937;
+    margin-bottom: 3pt;
   }
 
   .idea-section ul,
   .idea-section ol {
-    padding-left: 18pt;
-    margin: 0 0 6pt;
+    padding-left: 16pt;
+    margin: 2pt 0 4pt;
   }
 
+  .idea-section ul li::marker {
+    color: #3538cd;
+  }
+
+  .idea-section ol li::marker {
+    color: #3538cd;
+    font-weight: 700;
+  }
+
+  .idea-section strong {
+    color: #0f172a;
+    font-weight: 700;
+  }
+
+  .idea-section em {
+    color: #374151;
+  }
+
+  .idea-section a {
+    color: #3538cd;
+    text-decoration: underline;
+  }
+
+  /* Inline code */
   .idea-section code {
     font-family: "Courier New", monospace;
-    font-size: 9pt;
-    background: #f5f5f5;
-    padding: 0 2pt;
+    font-size: 8.5pt;
+    background: #e8eaff;
+    color: #3538cd;
+    padding: 0.5pt 3pt;
     border-radius: 2pt;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 
+  /* Code blocks */
   .idea-section pre {
-    background: #f5f5f5;
-    padding: 8pt;
-    font-size: 8.5pt;
+    background: #0f172a;
+    color: #e2e8f0;
+    padding: 9pt 10pt;
+    font-size: 8pt;
+    font-family: "Courier New", monospace;
     overflow: visible;
     white-space: pre-wrap;
     word-break: break-all;
     page-break-inside: avoid;
-    border-left: 2pt solid #3538cd;
+    break-inside: avoid;
+    border-radius: 4pt;
+    margin: 6pt 0 4pt;
+    border-left: 3pt solid #6366f1;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .idea-section pre code {
+    background: none;
+    color: inherit;
+    padding: 0;
+    font-size: inherit;
+  }
+
+  /* Blockquote */
+  .idea-section blockquote {
+    border-left: 3pt solid #c6c8f2;
+    margin: 4pt 0;
+    padding: 3pt 8pt;
+    color: #6b7280;
+    font-style: italic;
+    font-size: 9.5pt;
+  }
+
+  /* Tables */
+  .idea-section table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 9pt;
     margin: 6pt 0;
+    page-break-inside: avoid;
+    break-inside: avoid;
   }
 
-  .idea-section strong {
-    color: #111;
+  .idea-section th {
+    background: #3538cd;
+    color: #fff;
+    font-weight: 700;
+    padding: 4pt 8pt;
+    text-align: left;
+    font-size: 8pt;
+    letter-spacing: 0.05em;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 
-  /* Page settings */
-  @page {
-    size: A4;
-    margin: 18mm 18mm 16mm;
+  .idea-section td {
+    padding: 4pt 8pt;
+    border-bottom: 0.5pt solid #e5e7eb;
+    color: #374151;
+    vertical-align: top;
+  }
+
+  .idea-section tr:nth-child(even) td {
+    background: #f1f5f9;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* HR */
+  .idea-section hr {
+    border: none;
+    border-top: 0.5pt solid #e5e7eb;
+    margin: 8pt 0;
   }
 }
+
