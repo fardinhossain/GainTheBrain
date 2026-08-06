@@ -1340,12 +1340,7 @@ select:focus-visible,
   /* ── Page setup ─────────────────────────────────────────────────────────── */
   @page {
     size: A4;
-    margin: 14mm 18mm 18mm 24mm; /* extra left margin for accent bar */
-  }
-
-  /* First page — no top margin so the bar reaches the very top */
-  @page :first {
-    margin-top: 0;
+    margin: 16mm 18mm 18mm 18mm;
   }
 
   /* ── Hide non-reader UI ─────────────────────────────────────────────────── */
@@ -1374,19 +1369,6 @@ select:focus-visible,
   .app-shell {
     display: block !important;
     position: relative;
-  }
-
-  /* ── Left accent bar ────────────────────────────────────────────────────── */
-  .app-shell::before {
-    content: "";
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 6mm;
-    height: 100%;
-    background: #3538cd;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
   }
 
   .workspace {
