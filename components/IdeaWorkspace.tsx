@@ -171,22 +171,55 @@ export function IdeaWorkspace({ catalog }: IdeaWorkspaceProps) {
     setFolder("all");
   }
 
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+
   function selectAndFocus(id: string) {
     setSelectedId(id);
     readerRef.current?.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  function handleDownloadPdf() {
-    if (!selectedIdea) return;
-    document.documentElement.dataset.pdfTitle = selectedIdea.title;
-    document.documentElement.dataset.pdfMeta =
-      `${selectedIdea.folderLabel} · ${selectedIdea.difficulty} · ${selectedIdea.date || "No date"}`;
-    window.print();
-    // Clean up after the print dialog closes
-    setTimeout(() => {
-      delete document.documentElement.dataset.pdfTitle;
-      delete document.documentElement.dataset.pdfMeta;
-    }, 1000);
+  async function handleDownloadPdf() {
+    if (!selectedIdea || isGeneratingPdf) return;
+    setIsGeneratingPdf(true);
+
+    try {
+      const html2pdfModule = await import("html2pdf.js");
+      const html2pdf = html2pdfModule.default || html2pdfModule;
+
+      const readerElement = readerRef.current;
+      if (!readerElement) return;
+
+      // Create an offscreen export container
+      const container = document.createElement("div");
+      container.className = "pdf-export-container";
+
+      // Clone reader DOM
+      const clone = readerElement.cloneNode(true) as HTMLElement;
+      clone.querySelector(".pdf-btn")?.remove();
+      clone.querySelector(".assistant")?.remove();
+
+      container.appendChild(clone);
+      document.body.appendChild(container);
+
+      const safeFilename = `${selectedIdea.title.replace(/[^a-zA-Z0-9_-]/g, "_")}.pdf`;
+
+      const opt = {
+        margin: [10, 12, 12, 12] as [number, number, number, number],
+        filename: safeFilename,
+        image: { type: "jpeg" as const, quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, logging: false },
+        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" as const },
+        pagebreak: { mode: ["avoid-all", "css", "legacy"] },
+      };
+
+      await html2pdf().set(opt).from(container).save();
+      document.body.removeChild(container);
+    } catch (error) {
+      console.error("Direct PDF generation failed, opening print dialog:", error);
+      window.print();
+    } finally {
+      setIsGeneratingPdf(false);
+    }
   }
 
   function handleListKey(event: React.KeyboardEvent) {
@@ -417,12 +450,17 @@ export function IdeaWorkspace({ catalog }: IdeaWorkspaceProps) {
                   <button
                     className="pdf-btn"
                     type="button"
+                    disabled={isGeneratingPdf}
                     onClick={handleDownloadPdf}
                     title="Download as PDF"
                     aria-label="Download this project as PDF"
                   >
-                    <Download aria-hidden="true" />
-                    Download PDF
+                    {isGeneratingPdf ? (
+                      <Loader2 className="spin" aria-hidden="true" />
+                    ) : (
+                      <Download aria-hidden="true" />
+                    )}
+                    {isGeneratingPdf ? "Downloading..." : "Download PDF"}
                   </button>
                 </div>
                 <div className="reader-badges">
