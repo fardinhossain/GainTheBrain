@@ -182,42 +182,42 @@ export function IdeaWorkspace({ catalog }: IdeaWorkspaceProps) {
     if (!selectedIdea || isGeneratingPdf) return;
     setIsGeneratingPdf(true);
 
+    const readerElement = readerRef.current;
+    if (!readerElement) {
+      setIsGeneratingPdf(false);
+      return;
+    }
+
     try {
       const html2pdfModule = await import("html2pdf.js");
       const html2pdf = html2pdfModule.default || html2pdfModule;
 
-      const readerElement = readerRef.current;
-      if (!readerElement) return;
-
-      // Create an offscreen export container
-      const container = document.createElement("div");
-      container.className = "pdf-export-container";
-
-      // Clone reader DOM
-      const clone = readerElement.cloneNode(true) as HTMLElement;
-      clone.querySelector(".pdf-btn")?.remove();
-      clone.querySelector(".assistant")?.remove();
-
-      container.appendChild(clone);
-      document.body.appendChild(container);
+      // Temporarily apply PDF styling class to visible element
+      readerElement.classList.add("pdf-downloading");
 
       const safeFilename = `${selectedIdea.title.replace(/[^a-zA-Z0-9_-]/g, "_")}.pdf`;
 
       const opt = {
-        margin: [10, 12, 12, 12] as [number, number, number, number],
+        margin: [10, 10, 10, 10] as [number, number, number, number],
         filename: safeFilename,
         image: { type: "jpeg" as const, quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, logging: false },
+        html2canvas: {
+          scale: 2,
+          useCORS: true,
+          logging: false,
+          scrollY: 0,
+          scrollX: 0,
+        },
         jsPDF: { unit: "mm", format: "a4", orientation: "portrait" as const },
         pagebreak: { mode: ["avoid-all", "css", "legacy"] },
       };
 
-      await html2pdf().set(opt).from(container).save();
-      document.body.removeChild(container);
+      await html2pdf().set(opt).from(readerElement).save();
     } catch (error) {
       console.error("Direct PDF generation failed, opening print dialog:", error);
       window.print();
     } finally {
+      readerElement.classList.remove("pdf-downloading");
       setIsGeneratingPdf(false);
     }
   }
