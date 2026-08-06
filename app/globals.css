@@ -1119,164 +1119,7 @@ select:focus-visible,
   height: 15px;
 }
 
-/* ─── Print / Save as PDF styles ─────────────────────────────────────── */
-@media print {
-  /* Hide everything except the reader section */
-  .masthead,
-  .controls,
-  .filters,
-  .ledger,
-  .assistant,
-  .app-foot,
-  .btn-pdf,
-  .reader-badges {
-    display: none !important;
-  }
 
-  /* Reset layout so reader fills the page */
-  body {
-    background: #fff !important;
-    background-image: none !important;
-    color: #000 !important;
-    font-family: Georgia, "Times New Roman", serif;
-    font-size: 11pt;
-    margin: 0;
-    padding: 0;
-  }
-
-  .app-shell {
-    display: block !important;
-  }
-
-  .workspace {
-    display: block !important;
-  }
-
-  .reader {
-    all: unset;
-    display: block;
-    width: 100%;
-    overflow: visible !important;
-    height: auto !important;
-    color: #000;
-  }
-
-  /* Reader head */
-  .reader-head {
-    padding: 0 0 18pt 0;
-    border-bottom: 2pt solid #000;
-    margin-bottom: 18pt;
-    page-break-inside: avoid;
-  }
-
-  .reader-head-top {
-    display: block;
-  }
-
-  .reader-kicker {
-    font-size: 8pt;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: #555;
-    margin-bottom: 6pt;
-  }
-
-  .reader-head h2 {
-    font-size: 22pt;
-    font-weight: 700;
-    line-height: 1.2;
-    margin: 0 0 8pt 0;
-    color: #000;
-  }
-
-  .reader-summary {
-    font-size: 10.5pt;
-    color: #333;
-    margin: 0;
-  }
-
-  /* Sections */
-  .reader-scroll {
-    all: unset;
-    display: block;
-    overflow: visible !important;
-  }
-
-  .section-stack {
-    display: block;
-  }
-
-  .idea-section {
-    page-break-inside: avoid;
-    margin-bottom: 18pt;
-  }
-
-  .idea-section h3 {
-    font-size: 12pt;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    border-bottom: 1pt solid #ccc;
-    padding-bottom: 4pt;
-    margin: 0 0 8pt 0;
-  }
-
-  /* Markdown content */
-  .md-body {
-    font-size: 10.5pt;
-    line-height: 1.6;
-    color: #111;
-  }
-
-  .md-body p {
-    margin: 0 0 8pt 0;
-  }
-
-  .md-body ul,
-  .md-body ol {
-    padding-left: 20pt;
-    margin: 0 0 8pt 0;
-  }
-
-  .md-body li {
-    margin-bottom: 3pt;
-  }
-
-  .md-body h1, .md-body h2, .md-body h3, .md-body h4 {
-    page-break-after: avoid;
-    color: #000;
-  }
-
-  .md-body code {
-    font-family: "Courier New", monospace;
-    font-size: 9pt;
-    background: #f4f4f4;
-    padding: 1pt 3pt;
-    border-radius: 2pt;
-  }
-
-  .md-body pre {
-    background: #f4f4f4 !important;
-    color: #111 !important;
-    padding: 8pt;
-    font-size: 8.5pt;
-    border: 1pt solid #ddd;
-    border-radius: 3pt;
-    white-space: pre-wrap;
-    page-break-inside: avoid;
-  }
-
-  /* Print footer with URL */
-  @page {
-    size: A4;
-    margin: 20mm 18mm;
-    @bottom-center {
-      content: "GainTheBrain · " attr(data-title);
-      font-size: 8pt;
-      color: #888;
-    }
-  }
-}
 
 /* ---------- Theme toggle ---------- */
 .controls-right {
@@ -1451,10 +1294,38 @@ select:focus-visible,
   color: #fff;
 }
 
-/* ─── Print / PDF stylesheet ─────────────────────────────────────────────── */
+/* ─── Print / PDF stylesheet ─────────────────────────────────────────── */
 
 @media print {
-  /* ── Reset ──────────────────────────────────────────────────────────────── */
+  /* ── Step 1: Reset ALL CSS custom properties to light-mode values.
+     This prevents dark-theme var() values from bleeding into the PDF,
+     regardless of which data-theme the user had active on screen. ────── */
+  :root,
+  [data-theme="dark"] {
+    --paper: #ffffff;
+    --surface: #ffffff;
+    --surface-2: #f8f9ff;
+    --surface-3: #f0f4ff;
+    --ink: #111827;
+    --ink-soft: #374151;
+    --muted: #6b7280;
+    --faint: #9ca3af;
+    --line: #e5e7eb;
+    --line-strong: #d1d5db;
+    --accent: #3538cd;
+    --accent-ink: #1e20a0;
+    --accent-soft: #eef0fd;
+    --accent-line: #c6c8f2;
+    --signal: #c2410c;
+    --signal-soft: #fbeadf;
+    --code-bg: #1e293b;
+    --code-ink: #e2e8f0;
+    --shadow-sm: none;
+    --shadow: none;
+    --shadow-lift: none;
+  }
+
+  /* ── Step 2: Hard reset all elements ─────────────────────────────────── */
   *,
   *::before,
   *::after {
