@@ -4,12 +4,12 @@ import {
   ArrowUpDown,
   BrainCircuit,
   CalendarDays,
+  Download,
   FolderTree,
   Loader2,
   Moon,
   Search,
   Send,
-  ShieldCheck,
   Sparkles,
   Sun,
   Tag,
@@ -174,6 +174,19 @@ export function IdeaWorkspace({ catalog }: IdeaWorkspaceProps) {
   function selectAndFocus(id: string) {
     setSelectedId(id);
     readerRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function handleDownloadPdf() {
+    if (!selectedIdea) return;
+    document.documentElement.dataset.pdfTitle = selectedIdea.title;
+    document.documentElement.dataset.pdfMeta =
+      `${selectedIdea.folderLabel} · ${selectedIdea.difficulty} · ${selectedIdea.date || "No date"}`;
+    window.print();
+    // Clean up after the print dialog closes
+    setTimeout(() => {
+      delete document.documentElement.dataset.pdfTitle;
+      delete document.documentElement.dataset.pdfMeta;
+    }, 1000);
   }
 
   function handleListKey(event: React.KeyboardEvent) {
@@ -399,7 +412,19 @@ export function IdeaWorkspace({ catalog }: IdeaWorkspaceProps) {
                   <span>&middot;</span>
                   <span>{selectedIdea.categoryText}</span>
                 </div>
-                <h2>{selectedIdea.title}</h2>
+                <div className="reader-title-row">
+                  <h2>{selectedIdea.title}</h2>
+                  <button
+                    className="pdf-btn"
+                    type="button"
+                    onClick={handleDownloadPdf}
+                    title="Download as PDF"
+                    aria-label="Download this project as PDF"
+                  >
+                    <Download aria-hidden="true" />
+                    Download PDF
+                  </button>
+                </div>
                 <div className="reader-badges">
                   <span>
                     <FolderTree aria-hidden="true" />
@@ -506,9 +531,11 @@ export function IdeaWorkspace({ catalog }: IdeaWorkspaceProps) {
 
       <footer className="app-foot">
         <span>GainTheBrain &middot; private idea reader</span>
-        <span className="secure-tag">
-          <ShieldCheck aria-hidden="true" />
-          AI key kept server-side
+        <span>
+          Developed By{" "}
+          <a href="https://mdfardin.vercel.app/" target="_blank" rel="noopener noreferrer">
+            Fardin
+          </a>
         </span>
       </footer>
     </main>
