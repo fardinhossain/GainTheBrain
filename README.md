@@ -77,7 +77,7 @@ project-ideas/
 
 ### 🏛️ AI Builders Congress
 
-> Industry-vertical AI project blueprints — real-world problem spaces where AI can make a tangible difference. Each "sphere" represents a domain of human activity, paired with project ideas that apply AI to solve meaningful challenges.
+> Industry-vertical AI project blueprints — real-world problem spaces where AI can make a tangible difference. Each "sphere" represents a domain of human activity, paired with project ideas that apply AI to solve meaningful challenges..
 
 ```
 ai-builders-congress/
